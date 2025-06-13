@@ -1,0 +1,11 @@
+{
+    "name": "vosk",
+    "id": 20000,
+    "commands": [
+        {
+            "theme": "vosk",
+            "syntax": "vosk(&J;&J):J",
+            "threadSafe": true
+        }
+    ]
+}
