@@ -17,6 +17,7 @@ make -j$(sysctl -n hw.ncpu) online2 lm rnnlm
 ```
 
 ```
+cd vosk-api/src
 export KALDI_ROOT=~/kaldi 
 make -j$(sysctl -n hw.ncpu)
 ar rcs libvosk.a *.o  
