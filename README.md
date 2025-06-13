@@ -15,3 +15,9 @@ cd ../src
 ./configure --mathlib=OPENBLAS --shared --static --static-fst --static-math
 make -j$(sysctl -n hw.ncpu) online2 lm rnnlm
 ```
+
+```
+export KALDI_ROOT=~/kaldi 
+make -j$(sysctl -n hw.ncpu)
+ar rcs libvosk.a *.o  
+```
