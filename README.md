@@ -12,6 +12,6 @@ cd ~/kaldi/tools
 make openfst cub 
 ./extras/install_openblas_clapack.sh
 cd ../src
-./configure --mathlib=OPENBLAS_CLAPACK --shared --static --static-fst --static-math
+./configure --mathlib=OPENBLAS --shared --static --static-fst --static-math
 make -j$(sysctl -n hw.ncpu) online2 lm rnnlm
 ```
