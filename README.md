@@ -1,5 +1,7 @@
 # 4d-plugin-vosk
 
+- [x] `vosk-win64-0.3.45`
+
 ```
 brew install cmake swig python3
 ```
