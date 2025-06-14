@@ -35,3 +35,6 @@ var $wav : 4D.File
 $wav:=Folder(fk desktop folder).file("test.wav")
 $status:=vosk(Null; {model: $model; speaker: $speaker; rate: 16000; onData: $params.onData; userData: {window: $params.window}; duration: 9; output: $wav})
 ```
+
+> [!TIP]
+> Use large [models]([url](https://alphacephei.com/vosk/models)) for better speech recognition
