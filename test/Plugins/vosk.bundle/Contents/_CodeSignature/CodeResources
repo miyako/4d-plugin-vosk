@@ -24,7 +24,7 @@
 		<dict>
 			<key>cdhash</key>
 			<data>
-			O6zI3Ys3/mqj5CgIiKicHrhAt1Q=
+			aCq0D6IS/QgyxY/X/8OjtpXlawY=
 			</data>
 			<key>requirement</key>
 			<string>identifier "libgcc_s.1" and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = Y69CWUC25B</string>
@@ -52,11 +52,39 @@
 			83g+qzOpebL4uhII4n64uWghTDmyxOcxa818leNnEc4=
 			</data>
 		</dict>
+		<key>Windows64/libgcc_s_seh-1.dll</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			IBv4pU67SQ+T6kvrIHQKSDv2cDa5C1cg8y0MdGpy0ek=
+			</data>
+		</dict>
+		<key>Windows64/libstdc++-6.dll</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			odlqhIpWfXZX4VLP6S4v1i2kEpaMwR7IvbBL8g68V0c=
+			</data>
+		</dict>
+		<key>Windows64/libvosk.dll</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			kzHC9qMs93FBryfJdQ55UycY9Ru8LjzqPGDxTKQlHk4=
+			</data>
+		</dict>
+		<key>Windows64/libwinpthread-1.dll</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			ksrrik6igcZ0ADRiojPztEW2hbCm+T6xElT+2i3anN4=
+			</data>
+		</dict>
 		<key>Windows64/vosk.4DX</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			xZ0isPdvytfz/ISMhvmTet0RKxwRCg6HeDepN7N2icI=
+			qLolyQALPZdvjPIfnwfWnmCT5cpVCnhkKqru6+5tHVY=
 			</data>
 		</dict>
 	</dict>
