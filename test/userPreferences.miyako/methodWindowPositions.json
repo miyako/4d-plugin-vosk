@@ -12,9 +12,9 @@
 		"height": 685
 	},
 	"Sources/Methods/transcribe_file.4dm": {
-		"left": 181,
-		"top": 397,
-		"width": 944,
+		"left": -165,
+		"top": 438,
+		"width": 965,
 		"height": 585
 	},
 	"Sources/Forms/test/ObjectMethods/transcribe file.4dm": {
@@ -24,8 +24,8 @@
 		"height": 424
 	},
 	"Sources/Methods/onData.4dm": {
-		"left": 213,
-		"top": 446,
+		"left": -341,
+		"top": 443,
 		"width": 1105,
 		"height": 424
 	},

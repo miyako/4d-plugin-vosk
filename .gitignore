@@ -3,3 +3,4 @@ build/*
 a/*
 .vs/*
 Objs/*
+test/Plugins/vosk.bundle/Contents/Windows64/vosk.lib
