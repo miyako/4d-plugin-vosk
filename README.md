@@ -5,7 +5,7 @@
 
 # 4d-plugin-vosk
 
-- [x] `vosk-win64-0.3.45`
+4D implementation of [vosk](https://github.com/alphacep/vosk-api)
 
 ## Examples
 
