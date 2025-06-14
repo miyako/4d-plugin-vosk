@@ -15,6 +15,7 @@
 #include "C_TEXT.h"
 #include "vosk_api.h"
 #include "4DPlugin-JSON.h"
+#include "json.h"
 
 #include <stdio.h>
 

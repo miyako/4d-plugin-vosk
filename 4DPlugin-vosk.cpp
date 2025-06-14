@@ -117,6 +117,21 @@ static FILE *ufopen(const char* filename, const char* mode) {
 #endif
 }
 
+static void getFolderPath(PA_ObjectRef options, const wchar_t *key, std::string& path) {
+  
+    if(options) {
+        PA_ObjectRef folder = ob_get_o(options, key);
+        if(folder) {
+            if(!folder_object_to_path(folder, path)) {
+                CUTF8String stringValue;
+                if(!ob_get_s(options, key, &stringValue)) {
+                    path = (const char *)stringValue.c_str();
+                }
+            }
+        }
+    }
+}
+
 void vosk(PA_PluginParameters params) {
 
     PA_ObjectRef returnValue = PA_CreateObject();
@@ -125,52 +140,140 @@ void vosk(PA_PluginParameters params) {
     
     PA_ObjectRef options = PA_GetObjectParameter(params, 2);
     if(options != NULL) {
-        std::string modelFilePath;
-        PA_ObjectRef modelFile = ob_get_o(options, L"model");
-        if(modelFile) {
-            if(!file_object_to_path(modelFile, modelFilePath)) {
-                //not a file object
-                CUTF8String stringValue;
-                if(!ob_get_s(options, L"model", &stringValue)) {
-                    modelFilePath = (const char *)stringValue.c_str();
-                }
-            }
-        }
+        
+        std::string modelFolderPath;
+        getFolderPath(options, L"model", modelFolderPath);
+        
+        std::string speakerFolderPath;
+        getFolderPath(options, L"speaker", speakerFolderPath);
+        
         float sample_rate = 16000.0;
-        if(ob_is_defined(options, L"sample_rate")) {
-            sample_rate = ob_get_n(options, L"sample_rate");
+        if(ob_is_defined(options, L"rate")) {
+            sample_rate = ob_get_n(options, L"rate");
         }
         
-        VoskModel *model = vosk_model_new(modelFilePath.c_str());
+        VoskModel *model = NULL;
+        VoskSpkModel *spk_model = NULL;
         
+        if(modelFolderPath.length() != 0) {
+            model = vosk_model_new(modelFolderPath.c_str());
+        }
+        if(speakerFolderPath.length() != 0) {
+            spk_model = vosk_spk_model_new(speakerFolderPath.c_str());
+        }
+
         if(model) {
-            VoskRecognizer *recognizer = vosk_recognizer_new(model, sample_rate);
+            VoskRecognizer *recognizer = NULL;
+            
+            if(spk_model) {
+                recognizer = vosk_recognizer_new_spk(model, sample_rate, spk_model);
+            }else{
+                recognizer = vosk_recognizer_new(model, sample_rate);
+            }
+            
+            std::string speech;
+
             if(recognizer) {
                 std::string wav;
-                std::vector<char>buf(3200);
-                size_t nread, final;
+                std::vector<char>buf(0x2000);
+                Json::Value root;
+                std::string errors;
+                Json::CharReaderBuilder builder;
+                Json::CharReader *reader = builder.newCharReader();
+                size_t nread;
+                auto startTime = std::chrono::high_resolution_clock::now();//time(0);
                 if(file_object_to_path(PA_GetObjectParameter(params, 1), wav)) {
                     FILE *wavin = ufopen(wav.c_str(), "rb");
                     if(wavin) {
                         fseek(wavin, 44, SEEK_SET);
                         while (!feof(wavin)) {
                             nread = fread(&buf[0], 1, sizeof(buf), wavin);
-                            final = (size_t)vosk_recognizer_accept_waveform(recognizer, &buf[0], (int)nread);
-                            if (final) {
-                                printf("%s\n", vosk_recognizer_result(recognizer));
-                            } else {
-                                printf("%s\n", vosk_recognizer_partial_result(recognizer));
+                            int accept = vosk_recognizer_accept_waveform(recognizer, &buf[0], (int)nread);
+                            switch (accept) {
+                                case 0:
+                                {//partial
+                                    std::string json = vosk_recognizer_partial_result(recognizer);
+                                    bool parse = reader->parse((const char *)json.c_str(),
+                                                               (const char *)json.c_str() + json.size(),
+                                                               &root,
+                                                               &errors);
+                                    if(parse) {
+                                        Json::Value partial = root["partial"];
+                                        if(partial.isString()) {
+                                            std::string t = partial.asString();
+                                            if(t.length() != 0) {
+                                                printf("vosk_recognizer_partial_result: %s\n", t.c_str());
+                                            }
+                                        }
+                                    }
+                                }
+                                    break;
+                                case 1:
+                                {//silence
+                                    std::string json = vosk_recognizer_result(recognizer);
+                                    bool parse = reader->parse((const char *)json.c_str(),
+                                                               (const char *)json.c_str() + json.size(),
+                                                               &root,
+                                                               &errors);
+                                    if(parse) {
+                                        Json::Value text = root["text"];
+                                        if(text.isString()) {
+                                            std::string t = text.asString();
+                                            if(t.length() != 0) {
+                                                if(speech.length() != 0) {
+                                                    speech += " ";
+                                                }
+                                                printf("vosk_recognizer_result: %s\n", t.c_str());
+                                                speech += text.asString();
+                                            }
+                                        }
+                                    }
+                                }
+                                    break;
+                                default:
+                                    //exception
+                                    break;
+                            }
+                            auto now = std::chrono::high_resolution_clock::now();//time(0);
+                            auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(now - startTime).count();
+                            if(elapsedTime > 100)
+                            {
+                                startTime = now;
+                                PA_YieldAbsolute();
+                            }
+                        }//while
+                        std::string json = vosk_recognizer_final_result(recognizer);
+                        bool parse = reader->parse((const char *)json.c_str(),
+                                                   (const char *)json.c_str() + json.size(),
+                                                   &root,
+                                                   &errors);
+                        if(parse) {
+                            Json::Value text = root["text"];
+                            if(text.isString()) {
+                                std::string t = text.asString();
+                                if(t.length() != 0) {
+                                    if(speech.length() != 0) {
+                                        speech += " ";
+                                    }
+                                    printf("vosk_recognizer_final_result: %s\n", t.c_str());
+                                    speech += text.asString();
+                                }
                             }
                         }
+                        ob_set_s(returnValue, L"text", speech.c_str());
+                        PA_SetBooleanVariable(&success, 1);
                         fclose(wavin);
                     }
-                    PA_SetBooleanVariable(&success, 1);
+                    delete reader;
                 }
                 vosk_recognizer_free(recognizer);
             }
+            if(spk_model){
+                vosk_spk_model_free(spk_model);
+                spk_model = NULL;
+            }
             vosk_model_free(model);
         }
-        
     }
     
     set_object_property(returnValue, "success", success);

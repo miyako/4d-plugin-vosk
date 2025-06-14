@@ -22,6 +22,38 @@
 		D15899602DFCE279009DEEE8 /* 4DPlugin-JSON.h in Headers */ = {isa = PBXBuildFile; fileRef = D158995E2DFCE279009DEEE8 /* 4DPlugin-JSON.h */; };
 		D15899612DFCE279009DEEE8 /* 4DPlugin-JSON.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D158995F2DFCE279009DEEE8 /* 4DPlugin-JSON.cpp */; };
 		D15899632DFCE77F009DEEE8 /* libvosk.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D15899622DFCE775009DEEE8 /* libvosk.a */; };
+		D158996A2DFCF25D009DEEE8 /* libfst.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D15899672DFCF250009DEEE8 /* libfst.a */; };
+		D158996B2DFCF25D009DEEE8 /* libfstscript.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D15899642DFCF250009DEEE8 /* libfstscript.a */; };
+		D158996C2DFCF25D009DEEE8 /* libfstngram.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D15899682DFCF251009DEEE8 /* libfstngram.a */; };
+		D158996D2DFCF25D009DEEE8 /* libfstlookahead.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D15899662DFCF250009DEEE8 /* libfstlookahead.a */; };
+		D158996E2DFCF25D009DEEE8 /* libfstfarscript.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D15899692DFCF251009DEEE8 /* libfstfarscript.a */; };
+		D158996F2DFCF25D009DEEE8 /* libfstfar.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D15899652DFCF250009DEEE8 /* libfstfar.a */; };
+		D15899722DFCF286009DEEE8 /* libopenblasp-r0.3.29.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D15899712DFCF27C009DEEE8 /* libopenblasp-r0.3.29.a */; };
+		D15899752DFCFE6A009DEEE8 /* kaldi-online2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D15899742DFCFE62009DEEE8 /* kaldi-online2.a */; };
+		D15899772DFCFEEE009DEEE8 /* kaldi-base.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D15899762DFCFEE5009DEEE8 /* kaldi-base.a */; };
+		D15899792DFCFF47009DEEE8 /* kaldi-chain.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D15899782DFCFF3F009DEEE8 /* kaldi-chain.a */; };
+		D158997B2DFD1549009DEEE8 /* kaldi-ivector.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D158997A2DFD1549009DEEE8 /* kaldi-ivector.a */; };
+		D15899802DFD1677009DEEE8 /* kaldi-hmm.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D158997C2DFD1676009DEEE8 /* kaldi-hmm.a */; };
+		D15899812DFD1677009DEEE8 /* kaldi-fstext.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D158997D2DFD1676009DEEE8 /* kaldi-fstext.a */; };
+		D15899822DFD1677009DEEE8 /* kaldi-gmm.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D158997E2DFD1676009DEEE8 /* kaldi-gmm.a */; };
+		D15899832DFD1677009DEEE8 /* kaldi-feat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D158997F2DFD1676009DEEE8 /* kaldi-feat.a */; };
+		D15899842DFD17D4009DEEE8 /* libopenblas.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D15899702DFCF27C009DEEE8 /* libopenblas.a */; };
+		D15899912DFD17D5009DEEE8 /* kaldi-nnet3.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D15899852DFD17D4009DEEE8 /* kaldi-nnet3.a */; };
+		D15899922DFD17D5009DEEE8 /* kaldi-cudamatrix.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D15899862DFD17D4009DEEE8 /* kaldi-cudamatrix.a */; };
+		D15899932DFD17D5009DEEE8 /* kaldi-lat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D15899872DFD17D4009DEEE8 /* kaldi-lat.a */; };
+		D15899942DFD17D5009DEEE8 /* kaldi-decoder.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D15899882DFD17D4009DEEE8 /* kaldi-decoder.a */; };
+		D15899952DFD17D5009DEEE8 /* kaldi-transform.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D15899892DFD17D4009DEEE8 /* kaldi-transform.a */; };
+		D15899962DFD17D5009DEEE8 /* kaldi-tree.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D158998A2DFD17D4009DEEE8 /* kaldi-tree.a */; };
+		D15899972DFD17D5009DEEE8 /* kaldi-util.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D158998B2DFD17D4009DEEE8 /* kaldi-util.a */; };
+		D15899982DFD17D5009DEEE8 /* libjsoncpp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D158998C2DFD17D5009DEEE8 /* libjsoncpp.a */; };
+		D15899992DFD17D5009DEEE8 /* kaldi-rnnlm.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D158998D2DFD17D5009DEEE8 /* kaldi-rnnlm.a */; };
+		D158999A2DFD17D5009DEEE8 /* kaldi-lm.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D158998E2DFD17D5009DEEE8 /* kaldi-lm.a */; };
+		D158999B2DFD17D5009DEEE8 /* kaldi-nnet2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D158998F2DFD17D5009DEEE8 /* kaldi-nnet2.a */; };
+		D158999C2DFD17D5009DEEE8 /* kaldi-matrix.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D15899902DFD17D5009DEEE8 /* kaldi-matrix.a */; };
+		D158999E2DFD18C0009DEEE8 /* libomp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D158999D2DFD18C0009DEEE8 /* libomp.a */; };
+		D15899A02DFD1A5D009DEEE8 /* libgfortran.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D158999F2DFD1A5C009DEEE8 /* libgfortran.a */; };
+		D15899A22DFD1AF6009DEEE8 /* libquadmath.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D15899A12DFD1AF6009DEEE8 /* libquadmath.a */; };
+		D15899A42DFD1BE5009DEEE8 /* libgcc_s.1.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D15899A32DFD1BE5009DEEE8 /* libgcc_s.1.1.dylib */; };
 		D1A808C62DFCDF610006D954 /* C_TEXT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D1A808C42DFCDF610006D954 /* C_TEXT.cpp */; };
 		D1A808C72DFCDF610006D954 /* C_TEXT.h in Headers */ = {isa = PBXBuildFile; fileRef = D1A808C32DFCDF610006D954 /* C_TEXT.h */; };
 		D1A808C82DFCDF610006D954 /* C_TYPES.h in Headers */ = {isa = PBXBuildFile; fileRef = D1A808C52DFCDF610006D954 /* C_TYPES.h */; };
@@ -59,6 +91,38 @@
 		D158995E2DFCE279009DEEE8 /* 4DPlugin-JSON.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "4DPlugin-JSON.h"; path = "support/4DPlugin-JSON.h"; sourceTree = "<group>"; };
 		D158995F2DFCE279009DEEE8 /* 4DPlugin-JSON.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; name = "4DPlugin-JSON.cpp"; path = "support/4DPlugin-JSON.cpp"; sourceTree = "<group>"; };
 		D15899622DFCE775009DEEE8 /* libvosk.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libvosk.a; path = a/libvosk.a; sourceTree = "<group>"; };
+		D15899642DFCF250009DEEE8 /* libfstscript.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfstscript.a; path = a/libfstscript.a; sourceTree = "<group>"; };
+		D15899652DFCF250009DEEE8 /* libfstfar.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfstfar.a; path = a/libfstfar.a; sourceTree = "<group>"; };
+		D15899662DFCF250009DEEE8 /* libfstlookahead.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfstlookahead.a; path = a/libfstlookahead.a; sourceTree = "<group>"; };
+		D15899672DFCF250009DEEE8 /* libfst.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfst.a; path = a/libfst.a; sourceTree = "<group>"; };
+		D15899682DFCF251009DEEE8 /* libfstngram.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfstngram.a; path = a/libfstngram.a; sourceTree = "<group>"; };
+		D15899692DFCF251009DEEE8 /* libfstfarscript.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfstfarscript.a; path = a/libfstfarscript.a; sourceTree = "<group>"; };
+		D15899702DFCF27C009DEEE8 /* libopenblas.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopenblas.a; path = a/libopenblas.a; sourceTree = "<group>"; };
+		D15899712DFCF27C009DEEE8 /* libopenblasp-r0.3.29.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libopenblasp-r0.3.29.a"; path = "a/libopenblasp-r0.3.29.a"; sourceTree = "<group>"; };
+		D15899742DFCFE62009DEEE8 /* kaldi-online2.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "kaldi-online2.a"; path = "a/kaldi-online2.a"; sourceTree = "<group>"; };
+		D15899762DFCFEE5009DEEE8 /* kaldi-base.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "kaldi-base.a"; path = "a/kaldi-base.a"; sourceTree = "<group>"; };
+		D15899782DFCFF3F009DEEE8 /* kaldi-chain.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "kaldi-chain.a"; path = "a/kaldi-chain.a"; sourceTree = "<group>"; };
+		D158997A2DFD1549009DEEE8 /* kaldi-ivector.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "kaldi-ivector.a"; path = "a/kaldi-ivector.a"; sourceTree = "<group>"; };
+		D158997C2DFD1676009DEEE8 /* kaldi-hmm.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "kaldi-hmm.a"; path = "a/kaldi-hmm.a"; sourceTree = "<group>"; };
+		D158997D2DFD1676009DEEE8 /* kaldi-fstext.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "kaldi-fstext.a"; path = "a/kaldi-fstext.a"; sourceTree = "<group>"; };
+		D158997E2DFD1676009DEEE8 /* kaldi-gmm.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "kaldi-gmm.a"; path = "a/kaldi-gmm.a"; sourceTree = "<group>"; };
+		D158997F2DFD1676009DEEE8 /* kaldi-feat.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "kaldi-feat.a"; path = "a/kaldi-feat.a"; sourceTree = "<group>"; };
+		D15899852DFD17D4009DEEE8 /* kaldi-nnet3.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "kaldi-nnet3.a"; path = "a/kaldi-nnet3.a"; sourceTree = "<group>"; };
+		D15899862DFD17D4009DEEE8 /* kaldi-cudamatrix.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "kaldi-cudamatrix.a"; path = "a/kaldi-cudamatrix.a"; sourceTree = "<group>"; };
+		D15899872DFD17D4009DEEE8 /* kaldi-lat.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "kaldi-lat.a"; path = "a/kaldi-lat.a"; sourceTree = "<group>"; };
+		D15899882DFD17D4009DEEE8 /* kaldi-decoder.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "kaldi-decoder.a"; path = "a/kaldi-decoder.a"; sourceTree = "<group>"; };
+		D15899892DFD17D4009DEEE8 /* kaldi-transform.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "kaldi-transform.a"; path = "a/kaldi-transform.a"; sourceTree = "<group>"; };
+		D158998A2DFD17D4009DEEE8 /* kaldi-tree.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "kaldi-tree.a"; path = "a/kaldi-tree.a"; sourceTree = "<group>"; };
+		D158998B2DFD17D4009DEEE8 /* kaldi-util.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "kaldi-util.a"; path = "a/kaldi-util.a"; sourceTree = "<group>"; };
+		D158998C2DFD17D5009DEEE8 /* libjsoncpp.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libjsoncpp.a; path = a/libjsoncpp.a; sourceTree = "<group>"; };
+		D158998D2DFD17D5009DEEE8 /* kaldi-rnnlm.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "kaldi-rnnlm.a"; path = "a/kaldi-rnnlm.a"; sourceTree = "<group>"; };
+		D158998E2DFD17D5009DEEE8 /* kaldi-lm.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "kaldi-lm.a"; path = "a/kaldi-lm.a"; sourceTree = "<group>"; };
+		D158998F2DFD17D5009DEEE8 /* kaldi-nnet2.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "kaldi-nnet2.a"; path = "a/kaldi-nnet2.a"; sourceTree = "<group>"; };
+		D15899902DFD17D5009DEEE8 /* kaldi-matrix.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "kaldi-matrix.a"; path = "a/kaldi-matrix.a"; sourceTree = "<group>"; };
+		D158999D2DFD18C0009DEEE8 /* libomp.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libomp.a; path = a/libomp.a; sourceTree = "<group>"; };
+		D158999F2DFD1A5C009DEEE8 /* libgfortran.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgfortran.a; path = a/libgfortran.a; sourceTree = "<group>"; };
+		D15899A12DFD1AF6009DEEE8 /* libquadmath.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libquadmath.a; path = a/libquadmath.a; sourceTree = "<group>"; };
+		D15899A32DFD1BE5009DEEE8 /* libgcc_s.1.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libgcc_s.1.1.dylib; path = a/libgcc_s.1.1.dylib; sourceTree = "<group>"; };
 		D1A808C32DFCDF610006D954 /* C_TEXT.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = C_TEXT.h; path = "4D Plugin API/Classes/C_TEXT.h"; sourceTree = "<group>"; };
 		D1A808C42DFCDF610006D954 /* C_TEXT.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; name = C_TEXT.cpp; path = "4D Plugin API/Classes/C_TEXT.cpp"; sourceTree = "<group>"; };
 		D1A808C52DFCDF610006D954 /* C_TYPES.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = C_TYPES.h; path = "4D Plugin API/Classes/C_TYPES.h"; sourceTree = "<group>"; };
@@ -69,7 +133,39 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D15899982DFD17D5009DEEE8 /* libjsoncpp.a in Frameworks */,
+				D15899A42DFD1BE5009DEEE8 /* libgcc_s.1.1.dylib in Frameworks */,
+				D15899A22DFD1AF6009DEEE8 /* libquadmath.a in Frameworks */,
+				D15899A02DFD1A5D009DEEE8 /* libgfortran.a in Frameworks */,
+				D158999E2DFD18C0009DEEE8 /* libomp.a in Frameworks */,
+				D15899912DFD17D5009DEEE8 /* kaldi-nnet3.a in Frameworks */,
+				D15899922DFD17D5009DEEE8 /* kaldi-cudamatrix.a in Frameworks */,
+				D15899932DFD17D5009DEEE8 /* kaldi-lat.a in Frameworks */,
+				D15899942DFD17D5009DEEE8 /* kaldi-decoder.a in Frameworks */,
+				D15899952DFD17D5009DEEE8 /* kaldi-transform.a in Frameworks */,
+				D15899962DFD17D5009DEEE8 /* kaldi-tree.a in Frameworks */,
+				D15899972DFD17D5009DEEE8 /* kaldi-util.a in Frameworks */,
+				D15899992DFD17D5009DEEE8 /* kaldi-rnnlm.a in Frameworks */,
+				D158999A2DFD17D5009DEEE8 /* kaldi-lm.a in Frameworks */,
+				D158999B2DFD17D5009DEEE8 /* kaldi-nnet2.a in Frameworks */,
+				D158999C2DFD17D5009DEEE8 /* kaldi-matrix.a in Frameworks */,
+				D158996C2DFCF25D009DEEE8 /* libfstngram.a in Frameworks */,
+				D15899802DFD1677009DEEE8 /* kaldi-hmm.a in Frameworks */,
+				D15899822DFD1677009DEEE8 /* kaldi-gmm.a in Frameworks */,
+				D15899812DFD1677009DEEE8 /* kaldi-fstext.a in Frameworks */,
+				D15899832DFD1677009DEEE8 /* kaldi-feat.a in Frameworks */,
+				D158997B2DFD1549009DEEE8 /* kaldi-ivector.a in Frameworks */,
+				D15899792DFCFF47009DEEE8 /* kaldi-chain.a in Frameworks */,
+				D15899772DFCFEEE009DEEE8 /* kaldi-base.a in Frameworks */,
+				D15899752DFCFE6A009DEEE8 /* kaldi-online2.a in Frameworks */,
+				D158996B2DFCF25D009DEEE8 /* libfstscript.a in Frameworks */,
+				D158996D2DFCF25D009DEEE8 /* libfstlookahead.a in Frameworks */,
+				D158996E2DFCF25D009DEEE8 /* libfstfarscript.a in Frameworks */,
+				D158996F2DFCF25D009DEEE8 /* libfstfar.a in Frameworks */,
+				D158996A2DFCF25D009DEEE8 /* libfst.a in Frameworks */,
 				D15899632DFCE77F009DEEE8 /* libvosk.a in Frameworks */,
+				D15899722DFCF286009DEEE8 /* libopenblasp-r0.3.29.a in Frameworks */,
+				D15899842DFD17D4009DEEE8 /* libopenblas.a in Frameworks */,
 				D130064F12F02D9700702C0E /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -156,6 +252,38 @@
 		D16FBB3C22A4C07E008F0416 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				D15899A32DFD1BE5009DEEE8 /* libgcc_s.1.1.dylib */,
+				D15899A12DFD1AF6009DEEE8 /* libquadmath.a */,
+				D158999F2DFD1A5C009DEEE8 /* libgfortran.a */,
+				D158999D2DFD18C0009DEEE8 /* libomp.a */,
+				D15899862DFD17D4009DEEE8 /* kaldi-cudamatrix.a */,
+				D15899882DFD17D4009DEEE8 /* kaldi-decoder.a */,
+				D15899872DFD17D4009DEEE8 /* kaldi-lat.a */,
+				D158998E2DFD17D5009DEEE8 /* kaldi-lm.a */,
+				D15899902DFD17D5009DEEE8 /* kaldi-matrix.a */,
+				D158998F2DFD17D5009DEEE8 /* kaldi-nnet2.a */,
+				D15899852DFD17D4009DEEE8 /* kaldi-nnet3.a */,
+				D158998D2DFD17D5009DEEE8 /* kaldi-rnnlm.a */,
+				D15899892DFD17D4009DEEE8 /* kaldi-transform.a */,
+				D158998A2DFD17D4009DEEE8 /* kaldi-tree.a */,
+				D158998B2DFD17D4009DEEE8 /* kaldi-util.a */,
+				D158998C2DFD17D5009DEEE8 /* libjsoncpp.a */,
+				D158997F2DFD1676009DEEE8 /* kaldi-feat.a */,
+				D158997D2DFD1676009DEEE8 /* kaldi-fstext.a */,
+				D158997E2DFD1676009DEEE8 /* kaldi-gmm.a */,
+				D158997C2DFD1676009DEEE8 /* kaldi-hmm.a */,
+				D158997A2DFD1549009DEEE8 /* kaldi-ivector.a */,
+				D15899782DFCFF3F009DEEE8 /* kaldi-chain.a */,
+				D15899762DFCFEE5009DEEE8 /* kaldi-base.a */,
+				D15899742DFCFE62009DEEE8 /* kaldi-online2.a */,
+				D15899702DFCF27C009DEEE8 /* libopenblas.a */,
+				D15899712DFCF27C009DEEE8 /* libopenblasp-r0.3.29.a */,
+				D15899672DFCF250009DEEE8 /* libfst.a */,
+				D15899652DFCF250009DEEE8 /* libfstfar.a */,
+				D15899692DFCF251009DEEE8 /* libfstfarscript.a */,
+				D15899662DFCF250009DEEE8 /* libfstlookahead.a */,
+				D15899682DFCF251009DEEE8 /* libfstngram.a */,
+				D15899642DFCF250009DEEE8 /* libfstscript.a */,
 				D15899622DFCE775009DEEE8 /* libvosk.a */,
 			);
 			name = Frameworks;
