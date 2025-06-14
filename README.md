@@ -37,4 +37,4 @@ $status:=vosk(Null; {model: $model; speaker: $speaker; rate: 16000; onData: $par
 ```
 
 > [!TIP]
-> Use large [models]([url](https://alphacephei.com/vosk/models)) for better speech recognition
+> Use large [models](https://alphacephei.com/vosk/models) for better speech recognition
