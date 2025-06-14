@@ -11,10 +11,34 @@
 		"width": 965,
 		"height": 685
 	},
-	"Sources/Methods/test.4dm": {
-		"left": 82,
-		"top": 174,
-		"width": 1000,
-		"height": 432
+	"Sources/Methods/transcribe_file.4dm": {
+		"left": 181,
+		"top": 397,
+		"width": 944,
+		"height": 585
+	},
+	"Sources/Forms/test/ObjectMethods/transcribe file.4dm": {
+		"left": 213,
+		"top": 446,
+		"width": 1105,
+		"height": 424
+	},
+	"Sources/Methods/onData.4dm": {
+		"left": 213,
+		"top": 446,
+		"width": 1105,
+		"height": 424
+	},
+	"Sources/Methods/transcribe_audio_input.4dm": {
+		"left": 181,
+		"top": 397,
+		"width": 944,
+		"height": 585
+	},
+	"Sources/Forms/test/ObjectMethods/Button.4dm": {
+		"left": 167,
+		"top": 502,
+		"width": 1105,
+		"height": 400
 	}
 }

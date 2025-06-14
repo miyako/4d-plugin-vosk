@@ -54,6 +54,10 @@
 		D15899A02DFD1A5D009DEEE8 /* libgfortran.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D158999F2DFD1A5C009DEEE8 /* libgfortran.a */; };
 		D15899A22DFD1AF6009DEEE8 /* libquadmath.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D15899A12DFD1AF6009DEEE8 /* libquadmath.a */; };
 		D15899A42DFD1BE5009DEEE8 /* libgcc_s.1.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D15899A32DFD1BE5009DEEE8 /* libgcc_s.1.1.dylib */; };
+		D17909F02DFD4F7500CEE168 /* libportaudio.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D17909EF2DFD4F7500CEE168 /* libportaudio.a */; };
+		D17909F42DFD4FC000CEE168 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D17909F32DFD4FC000CEE168 /* AudioToolbox.framework */; };
+		D17909F52DFD501200CEE168 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D17909F12DFD4F9200CEE168 /* CoreAudio.framework */; };
+		D17909F72DFD505000CEE168 /* dr_wav.h in Headers */ = {isa = PBXBuildFile; fileRef = D17909F62DFD505000CEE168 /* dr_wav.h */; };
 		D1A808C62DFCDF610006D954 /* C_TEXT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D1A808C42DFCDF610006D954 /* C_TEXT.cpp */; };
 		D1A808C72DFCDF610006D954 /* C_TEXT.h in Headers */ = {isa = PBXBuildFile; fileRef = D1A808C32DFCDF610006D954 /* C_TEXT.h */; };
 		D1A808C82DFCDF610006D954 /* C_TYPES.h in Headers */ = {isa = PBXBuildFile; fileRef = D1A808C52DFCDF610006D954 /* C_TYPES.h */; };
@@ -123,6 +127,10 @@
 		D158999F2DFD1A5C009DEEE8 /* libgfortran.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgfortran.a; path = a/libgfortran.a; sourceTree = "<group>"; };
 		D15899A12DFD1AF6009DEEE8 /* libquadmath.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libquadmath.a; path = a/libquadmath.a; sourceTree = "<group>"; };
 		D15899A32DFD1BE5009DEEE8 /* libgcc_s.1.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libgcc_s.1.1.dylib; path = a/libgcc_s.1.1.dylib; sourceTree = "<group>"; };
+		D17909EF2DFD4F7500CEE168 /* libportaudio.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libportaudio.a; path = a/libportaudio.a; sourceTree = "<group>"; };
+		D17909F12DFD4F9200CEE168 /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
+		D17909F32DFD4FC000CEE168 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
+		D17909F62DFD505000CEE168 /* dr_wav.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = dr_wav.h; path = include/dr_wav.h; sourceTree = "<group>"; };
 		D1A808C32DFCDF610006D954 /* C_TEXT.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = C_TEXT.h; path = "4D Plugin API/Classes/C_TEXT.h"; sourceTree = "<group>"; };
 		D1A808C42DFCDF610006D954 /* C_TEXT.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; name = C_TEXT.cpp; path = "4D Plugin API/Classes/C_TEXT.cpp"; sourceTree = "<group>"; };
 		D1A808C52DFCDF610006D954 /* C_TYPES.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = C_TYPES.h; path = "4D Plugin API/Classes/C_TYPES.h"; sourceTree = "<group>"; };
@@ -133,6 +141,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D17909F52DFD501200CEE168 /* CoreAudio.framework in Frameworks */,
+				D17909F42DFD4FC000CEE168 /* AudioToolbox.framework in Frameworks */,
+				D17909F02DFD4F7500CEE168 /* libportaudio.a in Frameworks */,
 				D15899982DFD17D5009DEEE8 /* libjsoncpp.a in Frameworks */,
 				D15899A42DFD1BE5009DEEE8 /* libgcc_s.1.1.dylib in Frameworks */,
 				D15899A22DFD1AF6009DEEE8 /* libquadmath.a in Frameworks */,
@@ -206,6 +217,7 @@
 		08FB77ADFE841716C02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				D17909F62DFD505000CEE168 /* dr_wav.h */,
 				D158995C2DFCE17C009DEEE8 /* vosk_api.h */,
 				D1A808C32DFCDF610006D954 /* C_TEXT.h */,
 				D1A808C42DFCDF610006D954 /* C_TEXT.cpp */,
@@ -252,6 +264,9 @@
 		D16FBB3C22A4C07E008F0416 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				D17909F32DFD4FC000CEE168 /* AudioToolbox.framework */,
+				D17909F12DFD4F9200CEE168 /* CoreAudio.framework */,
+				D17909EF2DFD4F7500CEE168 /* libportaudio.a */,
 				D15899A32DFD1BE5009DEEE8 /* libgcc_s.1.1.dylib */,
 				D15899A12DFD1AF6009DEEE8 /* libquadmath.a */,
 				D158999F2DFD1A5C009DEEE8 /* libgfortran.a */,
@@ -304,6 +319,7 @@
 				D158995D2DFCE17C009DEEE8 /* vosk_api.h in Headers */,
 				18B684FA06944F2000CC6A1E /* PrivateTypes.h in Headers */,
 				18B684FB06944F2000CC6A1E /* PublicTypes.h in Headers */,
+				D17909F72DFD505000CEE168 /* dr_wav.h in Headers */,
 				D120937F13534DCC00A72CAA /* 4DPlugin-vosk.h in Headers */,
 				D15899602DFCE279009DEEE8 /* 4DPlugin-JSON.h in Headers */,
 			);

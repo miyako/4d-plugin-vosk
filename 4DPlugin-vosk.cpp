@@ -132,6 +132,34 @@ static void getFolderPath(PA_ObjectRef options, const wchar_t *key, std::string&
     }
 }
 
+#define FRAMES_PER_BUFFER 512
+
+// PortAudio callback: record audio and write to in-memory WAV
+static int recordCallback(const void *input, void *output,
+                          unsigned long frameCount,
+                          const PaStreamCallbackTimeInfo* timeInfo,
+                          PaStreamCallbackFlags statusFlags,
+                          void *userData) {
+    
+    UserData *data = (UserData *)userData;
+    const short *in = (const short *)input;
+
+    if (input != NULL) {
+        //primary buffer for recording
+        drwav_write_pcm_frames(&data->wav, frameCount, in);
+        //secondary buffer for live processing
+        size_t dataLength = frameCount * sizeof(int16_t);
+        size_t size = data->pos + dataLength;
+        if(size > data->buf.size()) {
+            data->buf.resize(size);
+        }
+        memcpy(&data->buf[data->pos], in, dataLength);
+        data->pos += dataLength;
+    }
+
+    return paContinue;
+}
+
 void vosk(PA_PluginParameters params) {
 
     PA_ObjectRef returnValue = PA_CreateObject();
@@ -152,6 +180,53 @@ void vosk(PA_PluginParameters params) {
             sample_rate = ob_get_n(options, L"rate");
         }
         
+        unsigned int seconds = 3;
+        if(ob_is_defined(options, L"duration")) {
+            seconds = ob_get_n(options, L"duration");
+        }
+        
+        std::string outputFilePath;
+        PA_ObjectRef outputFile = ob_get_o(options, L"output");
+        if(outputFile) {
+            file_object_to_path(outputFile, outputFilePath);
+        }
+        
+        PA_long32 method_id = 0;
+        bool execute_callback_method = false;
+        
+        CUTF16String methodName;
+        if(ob_get_a(options, L"onData", &methodName)){
+            method_id = PA_GetMethodID((PA_Unichar *)methodName.c_str());
+            if (method_id == 0) {
+                execute_callback_method = true;
+            }
+        }
+        
+        PA_ObjectRef userData = ob_get_o(options, L"userData");
+        PA_Unistring method = PA_CreateUnistring((PA_Unichar *)methodName.c_str());
+        PA_Variable    cbparams[4];
+        
+        if (method_id)
+        {
+            cbparams[0] = PA_CreateVariable(eVK_Object);//$1
+            cbparams[1] = PA_CreateVariable(eVK_Object);//$2
+            if(userData){
+                PA_SetObjectVariable(&cbparams[1], userData);
+            }
+        }
+        
+        if (execute_callback_method)
+        {
+            cbparams[0] = PA_CreateVariable(eVK_Unistring);//method
+            cbparams[1] = PA_CreateVariable(eVK_Boolean);//result
+            cbparams[2] = PA_CreateVariable(eVK_Object);//$1
+            cbparams[3] = PA_CreateVariable(eVK_Object);//$2
+            if(userData){
+                PA_SetObjectVariable(&cbparams[3], userData);
+            }
+            PA_SetStringVariable(&cbparams[0], &method);
+        }
+
         VoskModel *model = NULL;
         VoskSpkModel *spk_model = NULL;
         
@@ -241,9 +316,45 @@ void vosk(PA_PluginParameters params) {
                             if(elapsedTime > 100)
                             {
                                 startTime = now;
-                                PA_YieldAbsolute();
+                                
+                                if (execute_callback_method) {
+                                    
+                                    PA_ObjectRef status = PA_CreateObject();
+                                    ob_set_s(status, L"text", speech.c_str());
+                                    PA_SetObjectVariable(&cbparams[2], status);
+                                    PA_ExecuteCommandByID(1007 /*EXECUTE METHOD*/, cbparams, 4);
+                                    PA_Variable statusCode = cbparams[1];
+                                    if (PA_GetVariableKind(statusCode) == eVK_Boolean)
+                                    {
+                                        if (PA_GetBooleanVariable(statusCode))
+                                        {
+                                            break;
+                                        }
+                                    }
+                                }
+                                
+                                if (method_id) {
+                                    
+                                    PA_ObjectRef status = PA_CreateObject();
+                                    ob_set_s(status, L"text", speech.c_str());
+                                    PA_SetObjectVariable(&cbparams[0], status);
+                                    PA_Variable statusCode = PA_ExecuteMethodByID(method_id, cbparams, 2);
+                                    if (PA_GetVariableKind(statusCode) == eVK_Boolean)
+                                    {
+                                        if (PA_GetBooleanVariable(statusCode))
+                                        {
+                                            break;
+                                        }
+                                    }
+                                }
+                                
+                                if ((!execute_callback_method) && (!method_id)) {
+                                    PA_YieldAbsolute();
+                                }
+                               
                             }
                         }//while
+
                         std::string json = vosk_recognizer_final_result(recognizer);
                         bool parse = reader->parse((const char *)json.c_str(),
                                                    (const char *)json.c_str() + json.size(),
@@ -262,11 +373,291 @@ void vosk(PA_PluginParameters params) {
                                 }
                             }
                         }
+                        
+                        if (execute_callback_method) {
+                            
+                            PA_ObjectRef status = PA_CreateObject();
+                            ob_set_s(status, L"text", speech.c_str());
+                            PA_SetObjectVariable(&cbparams[2], status);
+                            PA_ExecuteCommandByID(1007 /*EXECUTE METHOD*/, cbparams, 4);
+                            
+                            PA_ClearVariable(&cbparams[0]);//string (method)
+                    //        PA_ClearVariable(&cbparams[1]);//bool (statusCode) don't clear this
+                            PA_ClearVariable(&cbparams[2]);//object $1
+                            PA_ClearVariable(&cbparams[3]);//object $2
+                        }
+                        
+                        if (method_id) {
+                            
+                            PA_ObjectRef status = PA_CreateObject();
+                            ob_set_s(status, L"text", speech.c_str());
+                            PA_SetObjectVariable(&cbparams[0], status);
+                            PA_ExecuteMethodByID(method_id, cbparams, 2);
+                                                 
+                            PA_ClearVariable(&cbparams[0]);//object $1
+                            PA_ClearVariable(&cbparams[1]);//object $2
+                        }
+   
                         ob_set_s(returnValue, L"text", speech.c_str());
                         PA_SetBooleanVariable(&success, 1);
                         fclose(wavin);
                     }
                     delete reader;
+                }else{
+                    //audio input
+                    
+                    PaStream *stream = NULL;
+                    UserData data;
+                    data.buf.resize(0);
+                    data.pos = 0;
+                    size_t lastRead = 0;
+                    size_t nread;
+                    
+                    drwav_data_format format = {
+                        .container = drwav_container_riff,
+                        .format = DR_WAVE_FORMAT_PCM,
+                        .channels = 1,
+                        .sampleRate = static_cast<drwav_uint32>(sample_rate),
+                        .bitsPerSample = 16
+                    };
+                    
+                    // Initialize dr_wav to write to memory
+                    if (drwav_init_memory_write(&data.wav,
+                                                &data.pWavData,
+                                                &data.wavDataSize,
+                                                &format, NULL)) {
+                        if(Pa_Initialize() == paNoError) {
+                            if(Pa_OpenDefaultStream(&stream,
+                                                    1 /*NUM_CHANNELS*/,
+                                                    0 /*INPUT*/,
+                                                    paInt16,
+                                                    sample_rate,
+                                                    FRAMES_PER_BUFFER,
+                                                    recordCallback,
+                                                    &data) == paNoError){
+                                auto startTime = std::chrono::high_resolution_clock::now();//time(0);
+                                auto beginTime = startTime;
+                                auto duration = 1000 * seconds;
+                                int totalElapsedTime;
+                                if (Pa_StartStream(stream) == paNoError) {
+                                    do {
+                                        auto now = std::chrono::high_resolution_clock::now();//time(0);
+                                        totalElapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(now - beginTime).count();
+                                        auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(now - startTime).count();
+                                        
+                                        if(elapsedTime > 100)
+                                        {
+                                            startTime = now;
+                                            
+                                            if((data.buf.size() > lastRead)){
+                                                nread = data.buf.size() - lastRead;
+                                                int accept = vosk_recognizer_accept_waveform(recognizer, &data.buf[lastRead], (int)nread);
+                                                lastRead += nread;
+                                                switch (accept) {
+                                                    case 0:
+                                                    {//partial
+                                                        
+                                                        std::string json = vosk_recognizer_partial_result(recognizer);
+                                                        bool parse = reader->parse((const char *)json.c_str(),
+                                                                                   (const char *)json.c_str() + json.size(),
+                                                                                   &root,
+                                                                                   &errors);
+                                                        if(parse) {
+                                                            Json::Value partial = root["partial"];
+                                                            if(partial.isString()) {
+                                                                std::string t = partial.asString();
+                                                                if(t.length() != 0) {
+                                                                    printf("vosk_recognizer_partial_result: %s\n", t.c_str());
+                                                                }
+                                                            }
+                                                        }
+                                                         
+                                                    }
+                                                        break;
+                                                    case 1:
+                                                    {//silence
+                                                        std::string json = vosk_recognizer_result(recognizer);
+                                                        bool parse = reader->parse((const char *)json.c_str(),
+                                                                                   (const char *)json.c_str() + json.size(),
+                                                                                   &root,
+                                                                                   &errors);
+                                                        if(parse) {
+                                                            Json::Value text = root["text"];
+                                                            if(text.isString()) {
+                                                                std::string t = text.asString();
+                                                                if(t.length() != 0) {
+                                                                    if(speech.length() != 0) {
+                                                                        speech += " ";
+                                                                    }
+    //                                                                printf("vosk_recognizer_result: %s\n", t.c_str());
+                                                                    speech += text.asString();
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                        break;
+                                                    default:
+                                                        //exception
+                                                        break;
+                                                }
+                                            
+                                            
+                                            if (execute_callback_method) {
+                                                
+                                                PA_ObjectRef status = PA_CreateObject();
+                                                ob_set_s(status, L"text", speech.c_str());
+                                                PA_SetObjectVariable(&cbparams[2], status);
+                                                PA_ExecuteCommandByID(1007 /*EXECUTE METHOD*/, cbparams, 4);
+                                                PA_Variable statusCode = cbparams[1];
+                                                if (PA_GetVariableKind(statusCode) == eVK_Boolean)
+                                                {
+                                                    if (PA_GetBooleanVariable(statusCode))
+                                                    {
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                            
+                                            if (method_id) {
+                                                
+                                                PA_ObjectRef status = PA_CreateObject();
+                                                ob_set_s(status, L"text", speech.c_str());
+                                                PA_SetObjectVariable(&cbparams[0], status);
+                                                PA_Variable statusCode = PA_ExecuteMethodByID(method_id, cbparams, 2);
+                                                if (PA_GetVariableKind(statusCode) == eVK_Boolean)
+                                                {
+                                                    if (PA_GetBooleanVariable(statusCode))
+                                                    {
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        
+                                        }
+                                        PA_YieldAbsolute();
+                                    } while (totalElapsedTime < duration);
+                                    Pa_StopStream(stream);
+                                }//Pa_StartStream
+                                Pa_CloseStream(stream);
+                            }//Pa_OpenDefaultStream
+                            Pa_Terminate();
+                        }//Pa_Initialize
+                        
+                        if((data.buf.size() > lastRead)){
+                            nread = data.buf.size() - lastRead;
+                            int accept = vosk_recognizer_accept_waveform(recognizer, &data.buf[lastRead], (int)nread);
+                            lastRead += nread;
+                            switch (accept) {
+                                case 0:
+                                {//partial
+                                    
+                                    std::string json = vosk_recognizer_partial_result(recognizer);
+                                    bool parse = reader->parse((const char *)json.c_str(),
+                                                               (const char *)json.c_str() + json.size(),
+                                                               &root,
+                                                               &errors);
+                                    if(parse) {
+                                        Json::Value partial = root["partial"];
+                                        if(partial.isString()) {
+                                            std::string t = partial.asString();
+                                            if(t.length() != 0) {
+                                                printf("vosk_recognizer_partial_result: %s\n", t.c_str());
+                                            }
+                                        }
+                                    }
+                                     
+                                }
+                                    break;
+                                case 1:
+                                {//silence
+                                    std::string json = vosk_recognizer_result(recognizer);
+                                    bool parse = reader->parse((const char *)json.c_str(),
+                                                               (const char *)json.c_str() + json.size(),
+                                                               &root,
+                                                               &errors);
+                                    if(parse) {
+                                        Json::Value text = root["text"];
+                                        if(text.isString()) {
+                                            std::string t = text.asString();
+                                            if(t.length() != 0) {
+                                                if(speech.length() != 0) {
+                                                    speech += " ";
+                                                }
+//                                                                printf("vosk_recognizer_result: %s\n", t.c_str());
+                                                speech += text.asString();
+                                            }
+                                        }
+                                    }
+                                }
+                                    break;
+                                default:
+                                    //exception
+                                    break;
+                            }
+                        
+                        }
+
+                        drwav_uninit(&data.wav);
+                        
+                        if(outputFilePath.length() != 0) {
+                            FILE *f = ufopen(outputFilePath.c_str(), "wb");
+                            if(f) {
+                                fwrite(data.pWavData, 1, data.wavDataSize, f);
+                                fclose(f);
+                            }
+                        }
+
+                        if (data.pWavData) {
+                            drwav_free(data.pWavData, NULL);
+                        }
+                        
+                        std::string json = vosk_recognizer_final_result(recognizer);
+                        bool parse = reader->parse((const char *)json.c_str(),
+                                                   (const char *)json.c_str() + json.size(),
+                                                   &root,
+                                                   &errors);
+                        if(parse) {
+                            Json::Value text = root["text"];
+                            if(text.isString()) {
+                                std::string t = text.asString();
+                                if(t.length() != 0) {
+                                    if(speech.length() != 0) {
+                                        speech += " ";
+                                    }
+//                                    printf("vosk_recognizer_final_result: %s\n", t.c_str());
+                                    speech += text.asString();
+                                }
+                            }
+                        }
+                        
+                        if (execute_callback_method) {
+                            
+                            PA_ObjectRef status = PA_CreateObject();
+                            ob_set_s(status, L"text", speech.c_str());
+                            PA_SetObjectVariable(&cbparams[2], status);
+                            PA_ExecuteCommandByID(1007 /*EXECUTE METHOD*/, cbparams, 4);
+                            
+                            PA_ClearVariable(&cbparams[0]);//string (method)
+                    //        PA_ClearVariable(&cbparams[1]);//bool (statusCode) don't clear this
+                            PA_ClearVariable(&cbparams[2]);//object $1
+                            PA_ClearVariable(&cbparams[3]);//object $2
+                        }
+                        
+                        if (method_id) {
+                            
+                            PA_ObjectRef status = PA_CreateObject();
+                            ob_set_s(status, L"text", speech.c_str());
+                            PA_SetObjectVariable(&cbparams[0], status);
+                            PA_ExecuteMethodByID(method_id, cbparams, 2);
+                                                 
+                            PA_ClearVariable(&cbparams[0]);//object $1
+                            PA_ClearVariable(&cbparams[1]);//object $2
+                        }
+                        
+                        ob_set_s(returnValue, L"text", speech.c_str());
+                        PA_SetBooleanVariable(&success, 1);
+                    }
                 }
                 vosk_recognizer_free(recognizer);
             }
@@ -281,4 +672,3 @@ void vosk(PA_PluginParameters params) {
     set_object_property(returnValue, "success", success);
     PA_ReturnObject(params, returnValue);
 }
-

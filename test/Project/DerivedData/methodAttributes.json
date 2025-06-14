@@ -1,7 +1,21 @@
 {
 	"methods": {
-		"test": {
-			"timeStamp": "2025-06-14T04:30:22Z"
+		"transcribe_file": {
+			"timeStamp": "2025-06-14T08:15:01Z",
+			"attributes": {
+				"invisible": true,
+				"preemptive": "capable"
+			}
+		},
+		"onData": {
+			"timeStamp": "2025-06-14T08:04:05Z"
+		},
+		"transcribe_audio_input": {
+			"timeStamp": "2025-06-14T10:11:16Z",
+			"attributes": {
+				"invisible": true,
+				"preemptive": "capable"
+			}
 		}
 	}
 }

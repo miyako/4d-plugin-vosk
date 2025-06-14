@@ -22,6 +22,18 @@
 #include <chrono>
 #include <stdio.h>
 
+#include "portaudio.h"
+#define DR_WAV_IMPLEMENTATION
+#include "dr_wav.h"
+
+typedef struct {
+    drwav wav;
+    void* pWavData;
+    size_t wavDataSize;
+    std::vector<char> buf;
+    size_t pos;
+} UserData;
+
 #pragma mark -
 
 void vosk(PA_PluginParameters params);
