@@ -192,6 +192,7 @@ void vosk(PA_PluginParameters params) {
                             switch (accept) {
                                 case 0:
                                 {//partial
+                                    /*
                                     std::string json = vosk_recognizer_partial_result(recognizer);
                                     bool parse = reader->parse((const char *)json.c_str(),
                                                                (const char *)json.c_str() + json.size(),
@@ -206,6 +207,7 @@ void vosk(PA_PluginParameters params) {
                                             }
                                         }
                                     }
+                                     */
                                 }
                                     break;
                                 case 1:
@@ -223,7 +225,7 @@ void vosk(PA_PluginParameters params) {
                                                 if(speech.length() != 0) {
                                                     speech += " ";
                                                 }
-                                                printf("vosk_recognizer_result: %s\n", t.c_str());
+//                                                printf("vosk_recognizer_result: %s\n", t.c_str());
                                                 speech += text.asString();
                                             }
                                         }
@@ -255,7 +257,7 @@ void vosk(PA_PluginParameters params) {
                                     if(speech.length() != 0) {
                                         speech += " ";
                                     }
-                                    printf("vosk_recognizer_final_result: %s\n", t.c_str());
+//                                    printf("vosk_recognizer_final_result: %s\n", t.c_str());
                                     speech += text.asString();
                                 }
                             }
