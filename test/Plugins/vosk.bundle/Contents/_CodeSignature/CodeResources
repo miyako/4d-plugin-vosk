@@ -8,7 +8,7 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			KZPQTDBVJWqUl0EazS7lZ9WoHBI=
+			4dQgHzXBKD9uWUkLUl4ozaLY/PU=
 			</data>
 			<key>optional</key>
 			<true/>
@@ -40,7 +40,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			XSUbdYN8oO2VJJvrLOlQ4sP4LS3WFrm2WNEI9gkX5FA=
+			GyILweNqYK0072qVtXNW49ukpgJEdjDapT/18RCu4Qk=
 			</data>
 			<key>optional</key>
 			<true/>
@@ -84,7 +84,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			qLolyQALPZdvjPIfnwfWnmCT5cpVCnhkKqru6+5tHVY=
+			Nm8TEr8/c2b8GGW3kgC9+SL12Wncej6N05LYJHvn8Og=
+			</data>
+		</dict>
+		<key>Windows64/vosk.exp</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			yAltoaHEmZbQxzH72lKIYUhjoOAjH4o2zliZ5/+bec4=
 			</data>
 		</dict>
 	</dict>
