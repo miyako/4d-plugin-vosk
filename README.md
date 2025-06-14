@@ -21,3 +21,8 @@ $speaker:=Folder("/RESOURCES/speakers/vosk-model-spk-0.4/")
 
 $status:=vosk($wav; {model: $model; speaker: $speaker; rate: 16000})
 ```
+
+## TODO
+
+- [ ] listen to audio input
+- [ ] callback
