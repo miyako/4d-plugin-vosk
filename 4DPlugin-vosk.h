@@ -17,6 +17,9 @@
 #include "4DPlugin-JSON.h"
 #include "json.h"
 
+#include <time.h>
+#include <mutex>
+#include <chrono>
 #include <stdio.h>
 
 #pragma mark -
