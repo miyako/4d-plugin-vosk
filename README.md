@@ -36,7 +36,7 @@ $status:=vosk($wav)
 ```4d
 var $wav : 4D.File
 $wav:=Folder(fk desktop folder).file("test.wav")
-$status:=vosk(Null; {onData: Formula(onData); userData: {window: $window}; duration: 9; output: $wav})
+$status:=vosk(Null; {onData: Formula(onData); userData: {window: Current form window; duration: 9; output: $wav})
 ```
 
 > [!TIP]
