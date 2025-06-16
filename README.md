@@ -9,6 +9,20 @@
 
 ## Examples
 
+* set global options
+  
+```4d
+var $model : 4D.Folder
+$model:=Folder("/RESOURCES/models/vosk-model-small-en-us-0.15/")
+//var $speaker : 4D.Folder
+//$speaker:=Folder("/RESOURCES/speakers/vosk-model-spk-0.4/")
+//speaker is optional
+
+vosk set options({model: $model; /* speaker: $speaker;*/rate: 16000})
+```  
+
+
+
 * transcribe the contents of a `.wav` file
 
 ```4d
