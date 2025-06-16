@@ -5,3 +5,4 @@ a/*
 Objs/*
 test/Plugins/vosk.bundle/Contents/Windows64/vosk.lib
 test/userPreferences.*
+test/Resources/models/*
