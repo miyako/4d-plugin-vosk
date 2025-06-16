@@ -8,14 +8,14 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			4dQgHzXBKD9uWUkLUl4ozaLY/PU=
+			twK5EhA0HRs9a631ZOQ+ibdskYk=
 			</data>
 			<key>optional</key>
 			<true/>
 		</dict>
 		<key>Resources/manifest.json</key>
 		<data>
-		NDZxsdomamUGJnqPOO1u/BvTYzo=
+		vwnPVIClRMOzFnqSqdt1xr9VAmY=
 		</data>
 	</dict>
 	<key>files2</key>
@@ -40,7 +40,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			GyILweNqYK0072qVtXNW49ukpgJEdjDapT/18RCu4Qk=
+			Rort3U7CntcuZpW8jrfVjFu589cCi8L02BUgtohoi64=
 			</data>
 			<key>optional</key>
 			<true/>
@@ -49,7 +49,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			7nJta+t814/q9urvxSrvW7btI/5e3fvXoXxrCCGlxEs=
+			7jb2oXDlnd+/68a/ce2GyZZ37b6z0XdOGD075zyGHm8=
 			</data>
 		</dict>
 		<key>Windows64/libgcc_s_seh-1.dll</key>
