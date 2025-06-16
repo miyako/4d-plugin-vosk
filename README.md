@@ -23,7 +23,7 @@ vosk set options({model: $model; /* speaker: $speaker;*/rate: 16000})
 
 
 
-* transcribe the contents of a `.wav` file
+* transcribe the content of a `.wav` file
 
 ```4d
 var $wav : 4D.File
