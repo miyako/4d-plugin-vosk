@@ -21,10 +21,10 @@ $model:=Folder("/RESOURCES/models/vosk-model-small-en-us-0.15/")
 var $speaker : 4D.Folder
 $speaker:=Folder("/RESOURCES/speakers/vosk-model-spk-0.4/")
 
-$status:=vosk($wav; {model: $model; speaker: $speaker; rate: 16000})
+$status:=vosk($wav)
 ```
 
-* transcribe audio input
+* transcribe audio input with callback, duration, output
 
 ```4d
 var $model : 4D.Folder
@@ -33,7 +33,7 @@ var $speaker : 4D.Folder
 $speaker:=Folder("/RESOURCES/speakers/vosk-model-spk-0.4/")
 var $wav : 4D.File
 $wav:=Folder(fk desktop folder).file("test.wav")
-$status:=vosk(Null; {model: $model; speaker: $speaker; rate: 16000; onData: $params.onData; userData: {window: $params.window}; duration: 9; output: $wav})
+$status:=vosk(Null; {onData: $params.onData; userData: {window: $params.window}; duration: 9; output: $wav})
 ```
 
 > [!TIP]
