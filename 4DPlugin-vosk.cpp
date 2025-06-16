@@ -12,18 +12,115 @@
 
 #pragma mark -
 
+std::mutex mutexVosk;
+VoskModel *model = NULL;
+VoskSpkModel *spk_model = NULL;
+VoskRecognizer *recognizer = NULL;
+std::string modelFolderPath;
+std::string speakerFolderPath;
+float sample_rate = 16000.0;
+bool isRunning = false;
+
+static void vosk_get_options(PA_PluginParameters params) {
+
+    PA_ObjectRef returnValue = PA_CreateObject();
+    
+    ob_set_s(returnValue, L"model", modelFolderPath.c_str());
+    ob_set_s(returnValue, L"speaker", speakerFolderPath.c_str());
+    ob_set_n(returnValue, L"rate", sample_rate);
+    
+    PA_ReturnObject(params, returnValue);
+}
+
+static void vosk_set_options(PA_PluginParameters params) {
+    
+    if(1)
+    {
+        std::lock_guard<std::mutex> lock(mutexVosk);
+        
+        PA_ObjectRef options = PA_GetObjectParameter(params, 1);
+        if(options != NULL) {
+            getFolderPath(options, L"model", modelFolderPath);
+            getFolderPath(options, L"speaker", speakerFolderPath);
+            if(ob_is_defined(options, L"rate")) {
+                sample_rate = ob_get_n(options, L"rate");
+            }
+        }
+            
+        if(speakerFolderPath.length() != 0) {
+            if(spk_model) {
+                vosk_spk_model_free(spk_model);
+            }
+            spk_model = vosk_spk_model_new(speakerFolderPath.c_str());
+        }
+        
+        if(modelFolderPath.length() != 0) {
+            if(model) {
+                vosk_model_free(model);
+            }
+            model = vosk_model_new(modelFolderPath.c_str());
+        }
+        
+        if(model) {
+            if(recognizer) {
+                vosk_recognizer_free(recognizer);
+            }
+            if(spk_model) {
+                recognizer = vosk_recognizer_new_spk(model, sample_rate, spk_model);
+            }else{
+                recognizer = vosk_recognizer_new(model, sample_rate);
+            }
+        }
+    }
+}
+
+static void OnExit()
+{
+    if(1)
+    {
+        std::lock_guard<std::mutex> lock(mutexVosk);
+        
+        if(recognizer) {
+            vosk_recognizer_free(recognizer);
+            recognizer = NULL;
+        }
+
+        if(spk_model){
+            vosk_spk_model_free(spk_model);
+            spk_model = NULL;
+        }
+        
+        if(model){
+            vosk_model_free(model);
+            model = NULL;
+        }
+        isRunning = false;
+    }
+}
+
 void PluginMain(PA_long32 selector, PA_PluginParameters params) {
     
 	try
 	{
         switch(selector)
         {
+            case kDeinitPlugin :
+            case kServerDeinitPlugin :
+                OnExit();
+                break;
 			// --- vosk
             
 			case 1 :
 				vosk(params);
 				break;
+            case 2 :
+                vosk_set_options(params);
+                break;
+            case 3 :
+                vosk_get_options(params);
+                break;
 
+                
         }
 
 	}
@@ -160,25 +257,15 @@ static int recordCallback(const void *input, void *output,
     return paContinue;
 }
 
-void vosk(PA_PluginParameters params) {
+static void vosk(PA_PluginParameters params) {
 
     PA_ObjectRef returnValue = PA_CreateObject();
     PA_Variable success = PA_CreateVariable(eVK_Boolean);
     PA_SetBooleanVariable(&success, 0);
     
     PA_ObjectRef options = PA_GetObjectParameter(params, 2);
+    
     if(options != NULL) {
-        
-        std::string modelFolderPath;
-        getFolderPath(options, L"model", modelFolderPath);
-        
-        std::string speakerFolderPath;
-        getFolderPath(options, L"speaker", speakerFolderPath);
-        
-        float sample_rate = 16000.0;
-        if(ob_is_defined(options, L"rate")) {
-            sample_rate = ob_get_n(options, L"rate");
-        }
         
         unsigned int seconds = 3;
         if(ob_is_defined(options, L"duration")) {
@@ -227,24 +314,17 @@ void vosk(PA_PluginParameters params) {
             PA_SetStringVariable(&cbparams[0], &method);
         }
 
-        VoskModel *model = NULL;
-        VoskSpkModel *spk_model = NULL;
-        
-        if(modelFolderPath.length() != 0) {
-            model = vosk_model_new(modelFolderPath.c_str());
-        }
-        if(speakerFolderPath.length() != 0) {
-            spk_model = vosk_spk_model_new(speakerFolderPath.c_str());
+        bool canRun = false;
+        if(1)
+        {
+            std::lock_guard<std::mutex> lock(mutexVosk);
+            if(!isRunning) {
+                isRunning = true;
+                canRun = true;
+            }
         }
 
-        if(model) {
-            VoskRecognizer *recognizer = NULL;
-            
-            if(spk_model) {
-                recognizer = vosk_recognizer_new_spk(model, sample_rate, spk_model);
-            }else{
-                recognizer = vosk_recognizer_new(model, sample_rate);
-            }
+        if((model) && (canRun)) {
             
             std::string speech;
 
@@ -659,13 +739,9 @@ void vosk(PA_PluginParameters params) {
                         PA_SetBooleanVariable(&success, 1);
                     }
                 }
-                vosk_recognizer_free(recognizer);
             }
-            if(spk_model){
-                vosk_spk_model_free(spk_model);
-                spk_model = NULL;
-            }
-            vosk_model_free(model);
+        
+            isRunning = false;
         }
     }
     

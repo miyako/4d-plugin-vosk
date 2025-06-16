@@ -6,6 +6,16 @@
             "theme": "vosk",
             "syntax": "vosk(&J;&J):J",
             "threadSafe": true
+        },
+        {
+            "theme": "vosk",
+            "syntax": "vosk set options(&J)",
+            "threadSafe": true
+        },
+        {
+            "theme": "vosk",
+            "syntax": "vosk get options:J",
+            "threadSafe": true
         }
     ]
 }

@@ -34,8 +34,12 @@ typedef struct {
     size_t pos;
 } UserData;
 
+static void getFolderPath(PA_ObjectRef options, const wchar_t *key, std::string& path);
+
 #pragma mark -
 
-void vosk(PA_PluginParameters params);
+static void vosk(PA_PluginParameters params);
+static void vosk_set_options(PA_PluginParameters params);
+static void vosk_get_options(PA_PluginParameters params);
 
 #endif /* PLUGIN_VOSK_H */
