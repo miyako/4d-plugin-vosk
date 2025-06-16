@@ -28,26 +28,15 @@ vosk set options({model: $model; /* speaker: $speaker;*/rate: 16000})
 ```4d
 var $wav : 4D.File
 $wav:=File("/RESOURCES/test.wav")
-
-var $model : 4D.Folder
-$model:=Folder("/RESOURCES/models/vosk-model-small-en-us-0.15/")
-
-var $speaker : 4D.Folder
-$speaker:=Folder("/RESOURCES/speakers/vosk-model-spk-0.4/")
-
 $status:=vosk($wav)
 ```
 
 * transcribe audio input with callback, duration, output
 
 ```4d
-var $model : 4D.Folder
-$model:=Folder("/RESOURCES/models/vosk-model-small-en-us-0.15/")
-var $speaker : 4D.Folder
-$speaker:=Folder("/RESOURCES/speakers/vosk-model-spk-0.4/")
 var $wav : 4D.File
 $wav:=Folder(fk desktop folder).file("test.wav")
-$status:=vosk(Null; {onData: $params.onData; userData: {window: $params.window}; duration: 9; output: $wav})
+$status:=vosk(Null; {onData: Formula(onData); userData: {window: Current form window; duration: 9; output: $wav})
 ```
 
 > [!TIP]
