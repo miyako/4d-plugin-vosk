@@ -21,6 +21,8 @@
 #include <mutex>
 #include <chrono>
 #include <stdio.h>
+#include <cmath>
+#include <memory>
 
 #include "portaudio.h"
 #define DR_WAV_IMPLEMENTATION
@@ -32,6 +34,7 @@ typedef struct {
     size_t wavDataSize;
     std::vector<char> buf;
     size_t pos;
+    std::mutex mutex;//buf/pos are written on the PortAudio thread and read on the 4D thread
 } UserData;
 
 static void getFolderPath(PA_ObjectRef options, const wchar_t *key, std::string& path);

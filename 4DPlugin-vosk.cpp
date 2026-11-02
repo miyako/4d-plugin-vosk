@@ -25,9 +25,14 @@ static void vosk_get_options(PA_PluginParameters params) {
 
     PA_ObjectRef returnValue = PA_CreateObject();
     
-    ob_set_s(returnValue, L"model", modelFolderPath.c_str());
-    ob_set_s(returnValue, L"speaker", speakerFolderPath.c_str());
-    ob_set_n(returnValue, L"rate", sample_rate);
+    if(1)
+    {
+        std::lock_guard<std::mutex> lock(mutexVosk);
+        
+        ob_set_s(returnValue, L"model", modelFolderPath.c_str());
+        ob_set_s(returnValue, L"speaker", speakerFolderPath.c_str());
+        ob_set_n(returnValue, L"rate", sample_rate);
+    }
     
     PA_ReturnObject(params, returnValue);
 }
@@ -43,7 +48,11 @@ static void vosk_set_options(PA_PluginParameters params) {
             getFolderPath(options, L"model", modelFolderPath);
             getFolderPath(options, L"speaker", speakerFolderPath);
             if(ob_is_defined(options, L"rate")) {
-                sample_rate = ob_get_n(options, L"rate");
+                double rate = ob_get_n(options, L"rate");
+                //ignore NaN, Inf, zero and negative rates (later cast to an unsigned sample rate)
+                if(std::isfinite(rate) && (rate > 0) && (rate <= 192000)) {
+                    sample_rate = (float)rate;
+                }
             }
         }
             
@@ -242,6 +251,7 @@ static int recordCallback(const void *input, void *output,
     const short *in = (const short *)input;
 
     if (input != NULL) {
+        std::lock_guard<std::mutex> lock(data->mutex);
         //primary buffer for recording
         drwav_write_pcm_frames(&data->wav, frameCount, in);
         //secondary buffer for live processing
@@ -257,11 +267,58 @@ static int recordCallback(const void *input, void *output,
     return paContinue;
 }
 
+//marks the recognizer as busy for the lifetime of one vosk() call, and always releases it
+//(also when no model is loaded, or when an exception is thrown)
+struct RunningGuard {
+    bool active;
+    RunningGuard() : active(false) {
+        std::lock_guard<std::mutex> lock(mutexVosk);
+        if(!isRunning) {
+            isRunning = true;
+            active = true;
+        }
+    }
+    ~RunningGuard() {
+        if(active) {
+            std::lock_guard<std::mutex> lock(mutexVosk);
+            isRunning = false;
+        }
+    }
+};
+
+//passes a new status object to the callback, releasing the one passed on the previous call
+static void set_callback_status(PA_Variable *param, const std::string& speech) {
+    
+    if((PA_GetVariableKind(*param) == eVK_Object) && (PA_GetObjectVariable(*param) != NULL)) {
+        PA_ClearVariable(param);
+    }
+    PA_ObjectRef status = PA_CreateObject();
+    ob_set_s(status, L"text", speech.c_str());
+    PA_SetObjectVariable(param, status);
+}
+
+static void vosk_transcribe(PA_PluginParameters params, PA_ObjectRef returnValue, PA_Variable& success);
+
 static void vosk(PA_PluginParameters params) {
 
     PA_ObjectRef returnValue = PA_CreateObject();
     PA_Variable success = PA_CreateVariable(eVK_Boolean);
     PA_SetBooleanVariable(&success, 0);
+    
+    try
+    {
+        vosk_transcribe(params, returnValue, success);
+    }
+    catch(...)
+    {
+        //an exception must not skip PA_ReturnObject: 4D would wait for the result forever
+    }
+    
+    set_object_property(returnValue, "success", success);
+    PA_ReturnObject(params, returnValue);
+}
+
+static void vosk_transcribe(PA_PluginParameters params, PA_ObjectRef returnValue, PA_Variable& success) {
     
     PA_ObjectRef options = PA_GetObjectParameter(params, 2);
     
@@ -269,7 +326,11 @@ static void vosk(PA_PluginParameters params) {
         
         unsigned int seconds = 3;
         if(ob_is_defined(options, L"duration")) {
-            seconds = ob_get_n(options, L"duration");
+            double d = ob_get_n(options, L"duration");
+            //validate before the cast: NaN, Inf or a negative double cast to unsigned is undefined
+            if(std::isfinite(d) && (d >= 0)) {
+                seconds = (unsigned int)((d < 86400) ? d : 86400);
+            }
         }
         
         std::string outputFilePath;
@@ -294,7 +355,6 @@ static void vosk(PA_PluginParameters params) {
         }
         
         PA_ObjectRef userData = ob_get_o(options, L"userData");
-        PA_Unistring method = PA_CreateUnistring((PA_Unichar *)methodName.c_str());
         PA_Variable    cbparams[4];
         
         if (method_id)
@@ -308,25 +368,19 @@ static void vosk(PA_PluginParameters params) {
         
         if (execute_callback_method)
         {
-            cbparams[0] = PA_CreateVariable(eVK_Unistring);//method
+            cbparams[0] = PA_CreateVariable(eVK_Undefined);//method (eVK_Unistring would allocate a string that PA_SetStringVariable overwrites)
             cbparams[1] = PA_CreateVariable(eVK_Boolean);//result
             cbparams[2] = PA_CreateVariable(eVK_Object);//$1
             cbparams[3] = PA_CreateVariable(eVK_Object);//$2
             if(userData){
                 PA_SetObjectVariable(&cbparams[3], userData);
             }
-            PA_SetStringVariable(&cbparams[0], &method);
+            PA_Unistring method = PA_CreateUnistring((PA_Unichar *)methodName.c_str());
+            PA_SetStringVariable(&cbparams[0], &method);//owned by cbparams[0] from here
         }
 
-        bool canRun = false;
-        if(1)
-        {
-            std::lock_guard<std::mutex> lock(mutexVosk);
-            if(!isRunning) {
-                isRunning = true;
-                canRun = true;
-            }
-        }
+        RunningGuard running;
+        bool canRun = running.active;
 
         if((model) && (canRun)) {
             
@@ -338,7 +392,7 @@ static void vosk(PA_PluginParameters params) {
                 Json::Value root;
                 std::string errors;
                 Json::CharReaderBuilder builder;
-                Json::CharReader *reader = builder.newCharReader();
+                std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
                 size_t nread;
                 auto startTime = std::chrono::high_resolution_clock::now();//time(0);
                 if(file_object_to_path(PA_GetObjectParameter(params, 1), wav)) {
@@ -346,7 +400,7 @@ static void vosk(PA_PluginParameters params) {
                     if(wavin) {
                         fseek(wavin, 44, SEEK_SET);
                         while (!feof(wavin)) {
-                            nread = fread(&buf[0], 1, sizeof(buf), wavin);
+                            nread = fread(&buf[0], 1, buf.size(), wavin);
                             int accept = vosk_recognizer_accept_waveform(recognizer, &buf[0], (int)nread);
                             switch (accept) {
                                 case 0:
@@ -403,9 +457,7 @@ static void vosk(PA_PluginParameters params) {
                                 
                                 if (execute_callback_method) {
                                     
-                                    PA_ObjectRef status = PA_CreateObject();
-                                    ob_set_s(status, L"text", speech.c_str());
-                                    PA_SetObjectVariable(&cbparams[2], status);
+                                    set_callback_status(&cbparams[2], speech);
                                     PA_ExecuteCommandByID(1007 /*EXECUTE METHOD*/, cbparams, 4);
                                     PA_Variable statusCode = cbparams[1];
                                     if (PA_GetVariableKind(statusCode) == eVK_Boolean)
@@ -419,9 +471,7 @@ static void vosk(PA_PluginParameters params) {
                                 
                                 if (method_id) {
                                     
-                                    PA_ObjectRef status = PA_CreateObject();
-                                    ob_set_s(status, L"text", speech.c_str());
-                                    PA_SetObjectVariable(&cbparams[0], status);
+                                    set_callback_status(&cbparams[0], speech);
                                     PA_Variable statusCode = PA_ExecuteMethodByID(method_id, cbparams, 2);
                                     if (PA_GetVariableKind(statusCode) == eVK_Boolean)
                                     {
@@ -460,9 +510,7 @@ static void vosk(PA_PluginParameters params) {
                         
                         if (execute_callback_method) {
                             
-                            PA_ObjectRef status = PA_CreateObject();
-                            ob_set_s(status, L"text", speech.c_str());
-                            PA_SetObjectVariable(&cbparams[2], status);
+                            set_callback_status(&cbparams[2], speech);
                             PA_ExecuteCommandByID(1007 /*EXECUTE METHOD*/, cbparams, 4);
                             
                             PA_ClearVariable(&cbparams[0]);//string (method)
@@ -473,9 +521,7 @@ static void vosk(PA_PluginParameters params) {
                         
                         if (method_id) {
                             
-                            PA_ObjectRef status = PA_CreateObject();
-                            ob_set_s(status, L"text", speech.c_str());
-                            PA_SetObjectVariable(&cbparams[0], status);
+                            set_callback_status(&cbparams[0], speech);
                             PA_ExecuteMethodByID(method_id, cbparams, 2);
                                                  
                             PA_ClearVariable(&cbparams[0]);//object $1
@@ -486,7 +532,6 @@ static void vosk(PA_PluginParameters params) {
                         PA_SetBooleanVariable(&success, 1);
                         fclose(wavin);
                     }
-                    delete reader;
                 }else{
                     //audio input
                     
@@ -533,9 +578,17 @@ static void vosk(PA_PluginParameters params) {
                                         {
                                             startTime = now;
                                             
-                                            if((data.buf.size() > lastRead)){
-                                                nread = data.buf.size() - lastRead;
-                                                int accept = vosk_recognizer_accept_waveform(recognizer, &data.buf[lastRead], (int)nread);
+                                            std::vector<char> chunk;
+                                            if(1)
+                                            {
+                                                std::lock_guard<std::mutex> lock(data.mutex);
+                                                if(data.pos > lastRead) {
+                                                    chunk.assign(data.buf.begin() + lastRead, data.buf.begin() + data.pos);
+                                                }
+                                            }
+                                            if(chunk.size() != 0){
+                                                nread = chunk.size();
+                                                int accept = vosk_recognizer_accept_waveform(recognizer, &chunk[0], (int)nread);
                                                 lastRead += nread;
                                                 switch (accept) {
                                                     case 0:
@@ -588,9 +641,7 @@ static void vosk(PA_PluginParameters params) {
                                             
                                             if (execute_callback_method) {
                                                 
-                                                PA_ObjectRef status = PA_CreateObject();
-                                                ob_set_s(status, L"text", speech.c_str());
-                                                PA_SetObjectVariable(&cbparams[2], status);
+                                                set_callback_status(&cbparams[2], speech);
                                                 PA_ExecuteCommandByID(1007 /*EXECUTE METHOD*/, cbparams, 4);
                                                 PA_Variable statusCode = cbparams[1];
                                                 if (PA_GetVariableKind(statusCode) == eVK_Boolean)
@@ -604,9 +655,7 @@ static void vosk(PA_PluginParameters params) {
                                             
                                             if (method_id) {
                                                 
-                                                PA_ObjectRef status = PA_CreateObject();
-                                                ob_set_s(status, L"text", speech.c_str());
-                                                PA_SetObjectVariable(&cbparams[0], status);
+                                                set_callback_status(&cbparams[0], speech);
                                                 PA_Variable statusCode = PA_ExecuteMethodByID(method_id, cbparams, 2);
                                                 if (PA_GetVariableKind(statusCode) == eVK_Boolean)
                                                 {
@@ -628,9 +677,17 @@ static void vosk(PA_PluginParameters params) {
                             Pa_Terminate();
                         }//Pa_Initialize
                         
-                        if((data.buf.size() > lastRead)){
-                            nread = data.buf.size() - lastRead;
-                            int accept = vosk_recognizer_accept_waveform(recognizer, &data.buf[lastRead], (int)nread);
+                        std::vector<char> chunk;
+                        if(1)
+                        {
+                            std::lock_guard<std::mutex> lock(data.mutex);
+                            if(data.pos > lastRead) {
+                                chunk.assign(data.buf.begin() + lastRead, data.buf.begin() + data.pos);
+                            }
+                        }
+                        if(chunk.size() != 0){
+                            nread = chunk.size();
+                            int accept = vosk_recognizer_accept_waveform(recognizer, &chunk[0], (int)nread);
                             lastRead += nread;
                             switch (accept) {
                                 case 0:
@@ -717,9 +774,7 @@ static void vosk(PA_PluginParameters params) {
                         
                         if (execute_callback_method) {
                             
-                            PA_ObjectRef status = PA_CreateObject();
-                            ob_set_s(status, L"text", speech.c_str());
-                            PA_SetObjectVariable(&cbparams[2], status);
+                            set_callback_status(&cbparams[2], speech);
                             PA_ExecuteCommandByID(1007 /*EXECUTE METHOD*/, cbparams, 4);
                             
                             PA_ClearVariable(&cbparams[0]);//string (method)
@@ -730,9 +785,7 @@ static void vosk(PA_PluginParameters params) {
                         
                         if (method_id) {
                             
-                            PA_ObjectRef status = PA_CreateObject();
-                            ob_set_s(status, L"text", speech.c_str());
-                            PA_SetObjectVariable(&cbparams[0], status);
+                            set_callback_status(&cbparams[0], speech);
                             PA_ExecuteMethodByID(method_id, cbparams, 2);
                                                  
                             PA_ClearVariable(&cbparams[0]);//object $1
@@ -745,10 +798,6 @@ static void vosk(PA_PluginParameters params) {
                 }
             }
         
-            isRunning = false;
         }
     }
-    
-    set_object_property(returnValue, "success", success);
-    PA_ReturnObject(params, returnValue);
 }
