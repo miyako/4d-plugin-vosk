@@ -206,12 +206,13 @@ jobs:
           BUNDLE="${PLUGINS_DIR}/${PRODUCT}.bundle"
 
           # clean only what the build produces: the committed runtime
-          # libraries (MacOS/libgcc_s.1.1.dylib, Windows64/*.dll) are not rebuilt
+          # libraries (MacOS/libgcc_s.1.1.dylib, Windows64/*.dll) are not rebuilt.
+          # no "rm -rf ${BASE}/plugins": the runner's file system is
+          # case-insensitive, so that would delete ${BASE}/Plugins as well
           echo "Cleaning stale outputs to avoid /Default/ vs / bug"
           rm -f "${BUNDLE}/Contents/MacOS/${PRODUCT}"
           rm -rf "${BUNDLE}/Contents/_CodeSignature"
           rm -rf "${PLUGINS_DIR}/Default"
-          rm -rf "${BASE}/plugins"
           rm -rf "${PLUGINS_DIR}/${PRODUCT}.build"
 
           echo "Building $XCODE_PROJECT target $XCODE_TARGET"
