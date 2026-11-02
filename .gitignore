@@ -7,3 +7,10 @@ test/Plugins/vosk.bundle/Contents/Windows64/vosk.lib
 test/userPreferences.*
 test/Resources/models/*
 test/Project/DerivedData/*
+.DS_Store
+/vosk.dmg
+/vosk.zip
+test/Data/Logs/
+test/Plugins/Default/
+test/Plugins/vosk.bundle/Contents/MacOS/vosk
+test/Plugins/vosk.bundle/Contents/_CodeSignature/

@@ -221,7 +221,7 @@ static void getFolderPath(PA_ObjectRef options, const wchar_t *key, std::string&
         if(folder) {
             if(!folder_object_to_path(folder, path)) {
                 CUTF8String stringValue;
-                if(!ob_get_s(options, key, &stringValue)) {
+                if(!ob_get_a(options, key, &stringValue)) {
                     path = (const char *)stringValue.c_str();
                 }
             }
@@ -282,7 +282,11 @@ static void vosk(PA_PluginParameters params) {
         bool execute_callback_method = false;
         
         CUTF16String methodName;
-        if(ob_get_a(options, L"onData", &methodName)){
+        CUTF8String methodNameU8;
+        if(ob_get_a(options, L"onData", &methodNameU8)){
+            C_TEXT t;
+            t.setUTF8String(&methodNameU8);
+            t.copyUTF16String(&methodName);
             method_id = PA_GetMethodID((PA_Unichar *)methodName.c_str());
             if (method_id == 0) {
                 execute_callback_method = true;
