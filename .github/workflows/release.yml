@@ -3,21 +3,23 @@
 # .bundle, codesigns + notarizes the mac binary, and publishes a GitHub
 # Release with the zip and dmg attached.
 #
-# NOTE: /test/ path is intentional and static for this project.
-# PORTABILITY: Edit only PRODUCT_NAME below. Everything else derives from it.
+# Trigger: push a tag matching v*.*.* by hand. A tag pushed by
+# bump-version.yml with GITHUB_TOKEN does NOT start this workflow: after a
+# bump, run `gh workflow run release.yml -f tag=vX.Y.Z`.
+# You can also run it manually against an existing tag with workflow_dispatch.
+#
+# PORTABILITY: edit only the env block below. Everything else is derived.
+# MACOS_DEPLOYMENT_TARGET must equal MACOSX_DEPLOYMENT_TARGET in the pbxproj.
 # Canonical layout enforced:
 #   test/Plugins/<Product>.bundle/Contents/MacOS/<Product>
 #   test/Plugins/<Product>.bundle/Contents/Windows64/<Product>.4DX
+#   test/Plugins/<Product>.bundle/Contents/Resources/manifest.json
 #
-# vosk-specific:
-# - The macOS link needs the prebuilt kaldi/openfst/openblas/... static
-#   libraries referenced from a/ in the Xcode project. They must be committed
-#   (a/* is gitignored; only a/libvosk.a is tracked). The "check prebuilt
-#   libraries" step fails early with the list of missing files.
-# - Runtime libraries are not rebuilt and stay committed in the bundle:
-#   Contents/MacOS/libgcc_s.1.1.dylib (loaded via @loader_path) and
-#   Contents/Windows64/{libvosk,libstdc++-6,libgcc_s_seh-1,libwinpthread-1}.dll.
-#   The macOS job therefore cleans only the plugin binary, never the bundle.
+# The macOS job never deletes the bundle: only the plugin binary and the
+# signature are rebuilt. Anything else committed in the bundle (Windows64/,
+# runtime dylibs in MacOS/, QuickLook/, ...) ships as committed. The runner's
+# file system is case-insensitive, so never `rm -rf .../plugins` (lower case):
+# that deletes .../Plugins too.
 
 name: Build & Release
 
@@ -89,6 +91,10 @@ jobs:
           Remove-Item -Recurse -Force -ErrorAction SilentlyContinue "$base/Plugins/Default"
           Remove-Item -Recurse -Force -ErrorAction SilentlyContinue "Objs"
 
+      # GitHub-hosted windows-latest ships VS2022 (v143 toolset) but not the
+      # legacy v140 toolset the project may be pinned to, so we override it on
+      # the command line rather than requiring an extra VS component install.
+      # Same for WindowsTargetPlatformVersion=8.1 -> 10.0
       - name: build x64
         shell: cmd
         run: |
@@ -102,6 +108,7 @@ jobs:
           $canonicalDir = "$base/Plugins/$product.bundle/Contents/Windows64"
           New-Item -ItemType Directory -Force -Path $canonicalDir | Out-Null
 
+          # msbuild may write to plugins\...\contents\windows64 (lower case, per the vcxproj)
           $found = Get-ChildItem -Recurse -Filter "$product.4DX" -ErrorAction SilentlyContinue | Where-Object { $_.FullName -like "*Plugins*" } | Select-Object -First 1
           if (-not $found) {
             Get-ChildItem -Recurse -Filter "*.4DX" | ForEach-Object { Write-Host $_.FullName }
@@ -141,17 +148,43 @@ jobs:
         with:
           ref: ${{ needs.version.outputs.tag }}
 
+      # The static libraries in a/ (Kaldi, OpenFst, vosk-api, jsoncpp, PortAudio)
+      # are not committed: scripts/build-macos-deps.sh builds them from pinned
+      # sources (about an hour). The result is cached under the script's hash,
+      # and saved right after the build, so a later signing or notarization
+      # failure doesn't throw the build away.
+      - name: restore prebuilt libraries
+        id: deps-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: a/*.a
+          key: macos-deps-${{ hashFiles('scripts/build-macos-deps.sh') }}
+
+      - name: build prebuilt libraries (cache miss)
+        if: steps.deps-cache.outputs.cache-hit != 'true'
+        run: |
+          brew install autoconf automake libtool || true
+          scripts/build-macos-deps.sh a
+
+      - name: save prebuilt libraries
+        if: steps.deps-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: a/*.a
+          key: macos-deps-${{ hashFiles('scripts/build-macos-deps.sh') }}
+
       - name: check prebuilt libraries
         run: |
           set -euo pipefail
+          # every a/... or lib/... file the Xcode project references must be
+          # committed (a gitignored a/* makes the link fail with "no such file")
           MISSING=0
-          # every a/... and lib/... file the Xcode project links against
-          for f in $(grep -o 'path = "\{0,1\}a/[^";]*' "${{ env.PRODUCT_NAME }}.xcodeproj/project.pbxproj" | sed 's/^path = "\{0,1\}//' | sort -u); do
-            if [ ! -f "$f" ]; then
-              echo "::error::Missing prebuilt library $f (a/* is gitignored; commit it)"
+          for f in $(grep -o 'path = "\{0,1\}\(a\|lib\)/[^";]*' "${{ env.PRODUCT_NAME }}.xcodeproj/project.pbxproj" | sed 's/^path = "\{0,1\}//' | sort -u); do
+            if [ ! -e "$f" ]; then
+              echo "::error::Missing prebuilt library $f"
               MISSING=1
             else
-              echo "$f: $(lipo -archs "$f")"
+              echo "$f: $(lipo -archs "$f" 2>/dev/null || echo '?')"
             fi
           done
           exit $MISSING
@@ -205,15 +238,13 @@ jobs:
           PLUGINS_DIR="${BASE}/Plugins"
           BUNDLE="${PLUGINS_DIR}/${PRODUCT}.bundle"
 
-          # clean only what the build produces: the committed runtime
-          # libraries (MacOS/libgcc_s.1.1.dylib, Windows64/*.dll) are not rebuilt.
-          # no "rm -rf ${BASE}/plugins": the runner's file system is
-          # case-insensitive, so that would delete ${BASE}/Plugins as well
+          # remove only what the build produces, so a misdirected build fails
+          # at verify instead of shipping a stale committed binary
           echo "Cleaning stale outputs to avoid /Default/ vs / bug"
-          rm -f "${BUNDLE}/Contents/MacOS/${PRODUCT}"
-          rm -rf "${BUNDLE}/Contents/_CodeSignature"
-          rm -rf "${PLUGINS_DIR}/Default"
-          rm -rf "${PLUGINS_DIR}/${PRODUCT}.build"
+          rm -f "${BUNDLE:?}/Contents/MacOS/${PRODUCT:?}"
+          rm -rf "${BUNDLE:?}/Contents/_CodeSignature"
+          rm -rf "${PLUGINS_DIR:?}/Default"
+          rm -rf "${PLUGINS_DIR:?}/${PRODUCT:?}.build"
 
           echo "Building $XCODE_PROJECT target $XCODE_TARGET"
           xcodebuild -project "$XCODE_PROJECT" \
@@ -238,7 +269,7 @@ jobs:
           BIN="${CONTENTS}/MacOS/${PRODUCT}"
 
           if [ ! -f "$BIN" ]; then
-            echo "::error::Expected binary not found at $BIN"
+            echo "::error::Expected binary not found at $BIN - CONFIGURATION_BUILD_DIR mismatch?"
             ls -R "$BASE"
             exit 1
           fi
@@ -246,6 +277,7 @@ jobs:
           echo "Timestamp check (must be recent):"
           ls -lT "$BIN" || ls -l --time-style=full "$BIN"
 
+          # separate lines: under set -e a failure left of && is ignored
           lipo -info "$BIN"
           lipo -info "$BIN" | grep -q "arm64"
           lipo -info "$BIN" | grep -q "x86_64"
@@ -254,16 +286,27 @@ jobs:
             exit 1
           fi
 
-          # runtime dependency loaded via @loader_path, must be universal too
-          lipo -info "${CONTENTS}/MacOS/libgcc_s.1.1.dylib"
-          lipo -info "${CONTENTS}/MacOS/libgcc_s.1.1.dylib" | grep -q "arm64"
-          lipo -info "${CONTENTS}/MacOS/libgcc_s.1.1.dylib" | grep -q "x86_64"
+          # runtime dylibs committed next to the binary must be universal too
+          for lib in "${CONTENTS}"/MacOS/*.dylib; do
+            [ -e "$lib" ] || continue
+            lipo -info "$lib"
+            lipo -info "$lib" | grep -q "arm64"
+            lipo -info "$lib" | grep -q "x86_64"
+          done
 
-          for f in Resources/manifest.json Resources/constants.xlf \
-                   Windows64/libvosk.dll Windows64/libstdc++-6.dll \
-                   Windows64/libgcc_s_seh-1.dll Windows64/libwinpthread-1.dll; do
-            if [ ! -f "${CONTENTS}/$f" ]; then
-              echo "::error::Missing ${CONTENTS}/$f"
+          if [ ! -f "${CONTENTS}/Resources/manifest.json" ]; then
+            echo "::error::Missing ${CONTENTS}/Resources/manifest.json"
+            exit 1
+          fi
+          if [ -f constants.xlf ] && [ ! -f "${CONTENTS}/Resources/constants.xlf" ]; then
+            echo "::error::constants.xlf is not copied to ${CONTENTS}/Resources"
+            exit 1
+          fi
+
+          # vosk: libvosk.dll and its MinGW runtime are committed, not rebuilt
+          for f in libvosk.dll libstdc++-6.dll libgcc_s_seh-1.dll libwinpthread-1.dll; do
+            if [ ! -f "${CONTENTS}/Windows64/$f" ]; then
+              echo "::error::Missing ${CONTENTS}/Windows64/$f"
               exit 1
             fi
           done
@@ -298,7 +341,7 @@ jobs:
           IDENTITY=$(security find-identity -v -p codesigning "$KEYCHAIN_PATH" \
             | grep "Developer ID Application" | head -1 | sed -E 's/.*"(.*)".*/\1/')
           if [ -z "$IDENTITY" ]; then
-            echo "::error::No Developer ID identity found"
+            echo "::error::No Developer ID Application identity found"
             security find-identity -v -p codesigning "$KEYCHAIN_PATH"
             exit 1
           fi
@@ -315,13 +358,16 @@ jobs:
           ZIP_PATH="${PRODUCT}-${VERSION}.zip"
           DMG_PATH="${PRODUCT}-${VERSION}.dmg"
 
+          # zip: cross-platform bundle (win + mac binaries together), what most users grab
           echo "Creating $ZIP_PATH"
           ditto -c -k --keepParent "$BUNDLE_PATH" "$ZIP_PATH"
 
+          # dmg: mac-friendly, and the only format Apple lets us staple a ticket to
           echo "Creating $DMG_PATH"
           hdiutil create -format UDBZ -volname "$PRODUCT" -srcfolder "$BUNDLE_PATH" "$DMG_PATH"
 
           # submit and wait; on anything but Accepted, print Apple's log and fail
+          # (notarytool submit --wait exits 0 even when the status is Invalid)
           notarize() {
             local OUT ID STATUS
             OUT=$(xcrun notarytool submit "$1" --keychain-profile "notarytool-profile" --keychain "$KEYCHAIN_PATH" \

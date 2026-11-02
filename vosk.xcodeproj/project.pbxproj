@@ -29,7 +29,6 @@
 		D158996D2DFCF25D009DEEE8 /* libfstlookahead.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D15899662DFCF250009DEEE8 /* libfstlookahead.a */; };
 		D158996E2DFCF25D009DEEE8 /* libfstfarscript.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D15899692DFCF251009DEEE8 /* libfstfarscript.a */; };
 		D158996F2DFCF25D009DEEE8 /* libfstfar.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D15899652DFCF250009DEEE8 /* libfstfar.a */; };
-		D15899722DFCF286009DEEE8 /* libopenblasp-r0.3.29.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D15899712DFCF27C009DEEE8 /* libopenblasp-r0.3.29.a */; };
 		D15899752DFCFE6A009DEEE8 /* kaldi-online2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D15899742DFCFE62009DEEE8 /* kaldi-online2.a */; };
 		D15899772DFCFEEE009DEEE8 /* kaldi-base.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D15899762DFCFEE5009DEEE8 /* kaldi-base.a */; };
 		D15899792DFCFF47009DEEE8 /* kaldi-chain.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D15899782DFCFF3F009DEEE8 /* kaldi-chain.a */; };
@@ -38,7 +37,6 @@
 		D15899812DFD1677009DEEE8 /* kaldi-fstext.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D158997D2DFD1676009DEEE8 /* kaldi-fstext.a */; };
 		D15899822DFD1677009DEEE8 /* kaldi-gmm.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D158997E2DFD1676009DEEE8 /* kaldi-gmm.a */; };
 		D15899832DFD1677009DEEE8 /* kaldi-feat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D158997F2DFD1676009DEEE8 /* kaldi-feat.a */; };
-		D15899842DFD17D4009DEEE8 /* libopenblas.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D15899702DFCF27C009DEEE8 /* libopenblas.a */; };
 		D15899912DFD17D5009DEEE8 /* kaldi-nnet3.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D15899852DFD17D4009DEEE8 /* kaldi-nnet3.a */; };
 		D15899922DFD17D5009DEEE8 /* kaldi-cudamatrix.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D15899862DFD17D4009DEEE8 /* kaldi-cudamatrix.a */; };
 		D15899932DFD17D5009DEEE8 /* kaldi-lat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D15899872DFD17D4009DEEE8 /* kaldi-lat.a */; };
@@ -51,13 +49,10 @@
 		D158999A2DFD17D5009DEEE8 /* kaldi-lm.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D158998E2DFD17D5009DEEE8 /* kaldi-lm.a */; };
 		D158999B2DFD17D5009DEEE8 /* kaldi-nnet2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D158998F2DFD17D5009DEEE8 /* kaldi-nnet2.a */; };
 		D158999C2DFD17D5009DEEE8 /* kaldi-matrix.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D15899902DFD17D5009DEEE8 /* kaldi-matrix.a */; };
-		D158999E2DFD18C0009DEEE8 /* libomp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D158999D2DFD18C0009DEEE8 /* libomp.a */; };
-		D15899A02DFD1A5D009DEEE8 /* libgfortran.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D158999F2DFD1A5C009DEEE8 /* libgfortran.a */; };
-		D15899A22DFD1AF6009DEEE8 /* libquadmath.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D15899A12DFD1AF6009DEEE8 /* libquadmath.a */; };
-		D15899A42DFD1BE5009DEEE8 /* libgcc_s.1.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D15899A32DFD1BE5009DEEE8 /* libgcc_s.1.1.dylib */; };
 		D17909F02DFD4F7500CEE168 /* libportaudio.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D17909EF2DFD4F7500CEE168 /* libportaudio.a */; };
 		D17909F42DFD4FC000CEE168 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D17909F32DFD4FC000CEE168 /* AudioToolbox.framework */; };
 		D17909F52DFD501200CEE168 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D17909F12DFD4F9200CEE168 /* CoreAudio.framework */; };
+		D1ACCE1F2E0F1A2B00C0FFEE /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D1ACCE1E2E0F1A2B00C0FFEE /* Accelerate.framework */; };
 		D17909F72DFD505000CEE168 /* dr_wav.h in Headers */ = {isa = PBXBuildFile; fileRef = D17909F62DFD505000CEE168 /* dr_wav.h */; };
 		D1A808C62DFCDF610006D954 /* C_TEXT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D1A808C42DFCDF610006D954 /* C_TEXT.cpp */; };
 		D1A808C72DFCDF610006D954 /* C_TEXT.h in Headers */ = {isa = PBXBuildFile; fileRef = D1A808C32DFCDF610006D954 /* C_TEXT.h */; };
@@ -103,8 +98,6 @@
 		D15899672DFCF250009DEEE8 /* libfst.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfst.a; path = a/libfst.a; sourceTree = "<group>"; };
 		D15899682DFCF251009DEEE8 /* libfstngram.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfstngram.a; path = a/libfstngram.a; sourceTree = "<group>"; };
 		D15899692DFCF251009DEEE8 /* libfstfarscript.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfstfarscript.a; path = a/libfstfarscript.a; sourceTree = "<group>"; };
-		D15899702DFCF27C009DEEE8 /* libopenblas.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopenblas.a; path = a/libopenblas.a; sourceTree = "<group>"; };
-		D15899712DFCF27C009DEEE8 /* libopenblasp-r0.3.29.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libopenblasp-r0.3.29.a"; path = "a/libopenblasp-r0.3.29.a"; sourceTree = "<group>"; };
 		D15899742DFCFE62009DEEE8 /* kaldi-online2.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "kaldi-online2.a"; path = "a/kaldi-online2.a"; sourceTree = "<group>"; };
 		D15899762DFCFEE5009DEEE8 /* kaldi-base.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "kaldi-base.a"; path = "a/kaldi-base.a"; sourceTree = "<group>"; };
 		D15899782DFCFF3F009DEEE8 /* kaldi-chain.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "kaldi-chain.a"; path = "a/kaldi-chain.a"; sourceTree = "<group>"; };
@@ -125,12 +118,9 @@
 		D158998E2DFD17D5009DEEE8 /* kaldi-lm.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "kaldi-lm.a"; path = "a/kaldi-lm.a"; sourceTree = "<group>"; };
 		D158998F2DFD17D5009DEEE8 /* kaldi-nnet2.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "kaldi-nnet2.a"; path = "a/kaldi-nnet2.a"; sourceTree = "<group>"; };
 		D15899902DFD17D5009DEEE8 /* kaldi-matrix.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "kaldi-matrix.a"; path = "a/kaldi-matrix.a"; sourceTree = "<group>"; };
-		D158999D2DFD18C0009DEEE8 /* libomp.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libomp.a; path = a/libomp.a; sourceTree = "<group>"; };
-		D158999F2DFD1A5C009DEEE8 /* libgfortran.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgfortran.a; path = a/libgfortran.a; sourceTree = "<group>"; };
-		D15899A12DFD1AF6009DEEE8 /* libquadmath.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libquadmath.a; path = a/libquadmath.a; sourceTree = "<group>"; };
-		D15899A32DFD1BE5009DEEE8 /* libgcc_s.1.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libgcc_s.1.1.dylib; path = a/libgcc_s.1.1.dylib; sourceTree = "<group>"; };
 		D17909EF2DFD4F7500CEE168 /* libportaudio.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libportaudio.a; path = a/libportaudio.a; sourceTree = "<group>"; };
 		D17909F12DFD4F9200CEE168 /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
+		D1ACCE1E2E0F1A2B00C0FFEE /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		D17909F32DFD4FC000CEE168 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		D17909F62DFD505000CEE168 /* dr_wav.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = dr_wav.h; path = include/dr_wav.h; sourceTree = "<group>"; };
 		D1A808C32DFCDF610006D954 /* C_TEXT.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = C_TEXT.h; path = "4D Plugin API/Classes/C_TEXT.h"; sourceTree = "<group>"; };
@@ -144,13 +134,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				D17909F52DFD501200CEE168 /* CoreAudio.framework in Frameworks */,
+				D1ACCE1F2E0F1A2B00C0FFEE /* Accelerate.framework in Frameworks */,
 				D17909F42DFD4FC000CEE168 /* AudioToolbox.framework in Frameworks */,
 				D17909F02DFD4F7500CEE168 /* libportaudio.a in Frameworks */,
 				D15899982DFD17D5009DEEE8 /* libjsoncpp.a in Frameworks */,
-				D15899A42DFD1BE5009DEEE8 /* libgcc_s.1.1.dylib in Frameworks */,
-				D15899A22DFD1AF6009DEEE8 /* libquadmath.a in Frameworks */,
-				D15899A02DFD1A5D009DEEE8 /* libgfortran.a in Frameworks */,
-				D158999E2DFD18C0009DEEE8 /* libomp.a in Frameworks */,
 				D15899912DFD17D5009DEEE8 /* kaldi-nnet3.a in Frameworks */,
 				D15899922DFD17D5009DEEE8 /* kaldi-cudamatrix.a in Frameworks */,
 				D15899932DFD17D5009DEEE8 /* kaldi-lat.a in Frameworks */,
@@ -177,8 +164,6 @@
 				D158996F2DFCF25D009DEEE8 /* libfstfar.a in Frameworks */,
 				D158996A2DFCF25D009DEEE8 /* libfst.a in Frameworks */,
 				D15899632DFCE77F009DEEE8 /* libvosk.a in Frameworks */,
-				D15899722DFCF286009DEEE8 /* libopenblasp-r0.3.29.a in Frameworks */,
-				D15899842DFD17D4009DEEE8 /* libopenblas.a in Frameworks */,
 				D130064F12F02D9700702C0E /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -268,11 +253,8 @@
 			children = (
 				D17909F32DFD4FC000CEE168 /* AudioToolbox.framework */,
 				D17909F12DFD4F9200CEE168 /* CoreAudio.framework */,
+				D1ACCE1E2E0F1A2B00C0FFEE /* Accelerate.framework */,
 				D17909EF2DFD4F7500CEE168 /* libportaudio.a */,
-				D15899A32DFD1BE5009DEEE8 /* libgcc_s.1.1.dylib */,
-				D15899A12DFD1AF6009DEEE8 /* libquadmath.a */,
-				D158999F2DFD1A5C009DEEE8 /* libgfortran.a */,
-				D158999D2DFD18C0009DEEE8 /* libomp.a */,
 				D15899862DFD17D4009DEEE8 /* kaldi-cudamatrix.a */,
 				D15899882DFD17D4009DEEE8 /* kaldi-decoder.a */,
 				D15899872DFD17D4009DEEE8 /* kaldi-lat.a */,
@@ -293,8 +275,6 @@
 				D15899782DFCFF3F009DEEE8 /* kaldi-chain.a */,
 				D15899762DFCFEE5009DEEE8 /* kaldi-base.a */,
 				D15899742DFCFE62009DEEE8 /* kaldi-online2.a */,
-				D15899702DFCF27C009DEEE8 /* libopenblas.a */,
-				D15899712DFCF27C009DEEE8 /* libopenblasp-r0.3.29.a */,
 				D15899672DFCF250009DEEE8 /* libfst.a */,
 				D15899652DFCF250009DEEE8 /* libfstfar.a */,
 				D15899692DFCF251009DEEE8 /* libfstfarscript.a */,

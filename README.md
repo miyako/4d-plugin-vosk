@@ -26,7 +26,7 @@ Offline speech recognition for 4D, built on [Vosk](https://github.com/alphacep/v
 - **Audio format.** File transcription expects 16-bit PCM mono `.wav` at the sample rate set with [`vosk set options`](#vosk-set-options) (16000 Hz by default). Live recording uses that same rate.
 - **Microphone access.** Live recording uses the system's default input device. On macOS the system asks the user for microphone permission for the 4D application the first time. If access is refused, expect the recording to contain no sound and `text` to be empty.
 - **Thread-safe.** All three commands are declared thread-safe, so they can run in a preemptive worker (the test database uses `CALL WORKER`).
-- **macOS binary of release 2.0.0.** The macOS binary built for `2.0.0` (the `vosk.zip` committed with that release) contains only an Apple silicon (`arm64`) slice, so it does not load on Intel Macs. A universal build needs the prebuilt Kaldi/OpenBLAS static libraries for both architectures (see [Building from source](#building-from-source)).
+- **macOS binary of release 2.0.0.** The macOS binary built for `2.0.0` (the `vosk.zip` committed with that release) contains only an Apple silicon (`arm64`) slice, so it does not load on Intel Macs. Releases built by the current workflow are universal (see [Building from source](#building-from-source)).
 - Requires 4D 20 or later (see the badge). The samples below use object literals (`{...}`); if your version doesn't support them, build the same objects with `New object`.
 
 ---
@@ -269,25 +269,16 @@ $o:=vosk get options  // {model; speaker; rate}
 
 ## Building from source
 
-The macOS build links Vosk and Kaldi statically (`a/`); the Windows build links `lib/libvosk.lib` and ships `libvosk.dll` and its MinGW runtime DLLs in `Contents/Windows64`.
+**macOS.** The plugin links Vosk, Kaldi, OpenFst, jsoncpp and PortAudio statically from `a/`. These archives aren't committed. `scripts/build-macos-deps.sh` builds them as universal (`arm64` + `x86_64`) archives from pinned sources: the alphacep forks of Kaldi (`vosk` branch) and OpenFst, vosk-api, jsoncpp 1.9.4 and PortAudio v19.7.0, matching the headers in `include/`. On macOS Kaldi uses Apple's Accelerate framework for BLAS/LAPACK, so there is no OpenBLAS or gfortran runtime to ship. The first build takes about an hour; the release workflow caches the result.
 
-```
-brew install cmake swig python3
-```
-
-```
-git clone -b vosk --single-branch --depth=1 https://github.com/alphacep/kaldi.git ~/kaldi
-cd ~/kaldi/tools
-make openfst cub 
-./extras/install_openblas_clapack.sh
-cd ../src
-./configure --mathlib=OPENBLAS --shared --static --static-fst --static-math
-make -j$(sysctl -n hw.ncpu) online2 lm rnnlm
+```bash
+brew install cmake autoconf automake libtool
 ```
 
+```bash
+scripts/build-macos-deps.sh
 ```
-cd vosk-api/src
-export KALDI_ROOT=~/kaldi 
-make -j$(sysctl -n hw.ncpu)
-ar rcs libvosk.a *.o  
-```
+
+Then build `vosk.xcodeproj` (target `vosk`, configuration `Default`).
+
+**Windows.** `vosk.sln` links `lib/libvosk.lib`; `Contents/Windows64` ships `libvosk.dll` and its MinGW runtime DLLs, committed prebuilt.
