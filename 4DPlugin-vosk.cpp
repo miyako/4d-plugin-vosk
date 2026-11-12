@@ -143,6 +143,8 @@ void PluginMain(PA_long32 selector, PA_PluginParameters params) {
 
 static bool _object_to_path(PA_ObjectRef f, std::string& path, int type) {
  
+    bool is_path = false;
+    
     if(f != NULL) {
         C_TEXT pp;
         pp.setUTF8String((const uint8_t *)"platformPath", 12);
@@ -150,41 +152,66 @@ static bool _object_to_path(PA_ObjectRef f, std::string& path, int type) {
         
         if(PA_GetObjectPropertyType(f, &PLATFORMPATH) == eVK_Unistring) {
             
+            is_path = true;
+            
+            //the result is owned: clear it, unless the call failed
             PA_Variable p = PA_GetObjectProperty(f, &PLATFORMPATH);
-            PA_Variable    cbparams[2];
-            cbparams[0] = PA_CreateVariable(eVK_Unistring);
-            cbparams[1] = PA_CreateVariable(eVK_Longint);
-            PA_Unistring platformPath = PA_GetStringVariable(p);
-            PA_SetStringVariable(&cbparams[0], &platformPath);
-            PA_SetLongintVariable(&cbparams[1], 1/*fk platform path*/);
-            PA_Variable folder = PA_ExecuteCommandByID(type, cbparams, 2);
-            
+            if(PA_GetLastError() == eER_NoErr) {
+                if(PA_GetVariableKind(p) == eVK_Unistring) {
+                    PA_Unistring platformPath = PA_GetStringVariable(p);
+                    bool has_path = true;
+                    PA_Variable    cbparams[2];
+                    //eVK_Unistring would allocate a string that PA_SetStringVariable overwrites
+                    cbparams[0] = PA_CreateVariable(eVK_Undefined);
+                    cbparams[1] = PA_CreateVariable(eVK_Longint);
+                    //shallow: cbparams[0] borrows the string of p, so it is never cleared
+                    PA_SetStringVariable(&cbparams[0], &platformPath);
+                    PA_SetLongintVariable(&cbparams[1], 1/*fk platform path*/);
+                    PA_Variable folder = PA_ExecuteCommandByID(type, cbparams, 2);
+                    PA_ErrorCode err = PA_GetLastError();
 #if VERSIONMAC
-            pp.setUTF8String((const uint8_t *)"path", 4);
-            PA_Unistring PATH = PA_CreateUnistring((PA_Unichar *)pp.getUTF16StringPtr());
-            PA_Variable _p = PA_GetObjectProperty(PA_GetObjectVariable(folder), &PATH);
-            platformPath = PA_GetStringVariable(_p);
+                    has_path = false;
+                    PA_Variable _p;
+                    bool has_p = false;
+                    if((err == eER_NoErr)
+                       && (PA_GetVariableKind(folder) == eVK_Object)
+                       && (PA_GetObjectVariable(folder) != NULL)) {
+                        pp.setUTF8String((const uint8_t *)"path", 4);
+                        PA_Unistring PATH = PA_CreateUnistring((PA_Unichar *)pp.getUTF16StringPtr());
+                        _p = PA_GetObjectProperty(PA_GetObjectVariable(folder), &PATH);
+                        has_p = (PA_GetLastError() == eER_NoErr);
+                        if((has_p) && (PA_GetVariableKind(_p) == eVK_Unistring)) {
+                            platformPath = PA_GetStringVariable(_p);
+                            has_path = true;
+                        }
+                        PA_DisposeUnistring(&PATH);
+                    }
 #endif
-            C_TEXT t;
-            t.setUTF16String(&platformPath);
-            CUTF8String u8;
-            t.copyUTF8String(&u8);
-            path = std::string((const char *)u8.c_str(), u8.size());
-            
-            PA_ClearVariable(&cbparams[0]);
-            PA_ClearVariable(&cbparams[1]);//PLATFORMPATH belongs to variable. no need to dispose
+                    if(has_path) {
+                        C_TEXT t;
+                        t.setUTF16String(&platformPath);
+                        CUTF8String u8;
+                        t.copyUTF8String(&u8);
+                        path = std::string((const char *)u8.c_str(), u8.size());
+                    }
 #if VERSIONMAC
-            PA_DisposeUnistring(&PATH);
-            PA_ClearVariable(&_p);//see .h of PA_GetObjectProperty
+                    if(has_p) {
+                        PA_ClearVariable(&_p);//see .h of PA_GetObjectProperty
+                    }
 #endif
-            PA_ClearVariable(&p);//see .h of PA_GetObjectProperty
-            
-            return true;
+                    if(err == eER_NoErr) {
+                        PA_ClearVariable(&folder);
+                    }
+                    PA_ClearVariable(&cbparams[1]);
+                }
+                PA_ClearVariable(&p);//see .h of PA_GetObjectProperty
+            }
         }
-    
+        
+        PA_DisposeUnistring(&PLATFORMPATH);
     }
     
-    return false;
+    return is_path;
 }
 
 static bool file_object_to_path(PA_ObjectRef f, std::string& path) {
@@ -295,6 +322,29 @@ static void set_callback_status(PA_Variable *param, const std::string& speech) {
     PA_ObjectRef status = PA_CreateObject();
     ob_set_s(status, L"text", speech.c_str());
     PA_SetObjectVariable(param, status);
+}
+
+//releases the status object passed to the callback (a userData slot is borrowed: never pass it here)
+static void clear_callback_status(PA_Variable *param) {
+    
+    if((PA_GetVariableKind(*param) == eVK_Object) && (PA_GetObjectVariable(*param) != NULL)) {
+        PA_ClearVariable(param);
+    }
+}
+
+//calls the project method; true if it returned True (stop)
+static bool execute_callback_method_by_id(PA_long32 method_id, PA_Variable *cbparams) {
+    
+    bool stop = false;
+    //the result is owned: clear it, unless the call failed
+    PA_Variable statusCode = PA_ExecuteMethodByID(method_id, cbparams, 2);
+    if(PA_GetLastError() == eER_NoErr) {
+        if (PA_GetVariableKind(statusCode) == eVK_Boolean) {
+            stop = PA_GetBooleanVariable(statusCode);
+        }
+        PA_ClearVariable(&statusCode);
+    }
+    return stop;
 }
 
 static void vosk_transcribe(PA_PluginParameters params, PA_ObjectRef returnValue, PA_Variable& success);
@@ -472,13 +522,9 @@ static void vosk_transcribe(PA_PluginParameters params, PA_ObjectRef returnValue
                                 if (method_id) {
                                     
                                     set_callback_status(&cbparams[0], speech);
-                                    PA_Variable statusCode = PA_ExecuteMethodByID(method_id, cbparams, 2);
-                                    if (PA_GetVariableKind(statusCode) == eVK_Boolean)
+                                    if (execute_callback_method_by_id(method_id, cbparams))
                                     {
-                                        if (PA_GetBooleanVariable(statusCode))
-                                        {
-                                            break;
-                                        }
+                                        break;
                                     }
                                 }
                                 
@@ -512,20 +558,12 @@ static void vosk_transcribe(PA_PluginParameters params, PA_ObjectRef returnValue
                             
                             set_callback_status(&cbparams[2], speech);
                             PA_ExecuteCommandByID(1007 /*EXECUTE METHOD*/, cbparams, 4);
-                            
-                            PA_ClearVariable(&cbparams[0]);//string (method)
-                    //        PA_ClearVariable(&cbparams[1]);//bool (statusCode) don't clear this
-                            PA_ClearVariable(&cbparams[2]);//object $1
-                            PA_ClearVariable(&cbparams[3]);//object $2
                         }
                         
                         if (method_id) {
                             
                             set_callback_status(&cbparams[0], speech);
-                            PA_ExecuteMethodByID(method_id, cbparams, 2);
-                                                 
-                            PA_ClearVariable(&cbparams[0]);//object $1
-                            PA_ClearVariable(&cbparams[1]);//object $2
+                            execute_callback_method_by_id(method_id, cbparams);
                         }
    
                         ob_set_s(returnValue, L"text", speech.c_str());
@@ -656,13 +694,9 @@ static void vosk_transcribe(PA_PluginParameters params, PA_ObjectRef returnValue
                                             if (method_id) {
                                                 
                                                 set_callback_status(&cbparams[0], speech);
-                                                PA_Variable statusCode = PA_ExecuteMethodByID(method_id, cbparams, 2);
-                                                if (PA_GetVariableKind(statusCode) == eVK_Boolean)
+                                                if (execute_callback_method_by_id(method_id, cbparams))
                                                 {
-                                                    if (PA_GetBooleanVariable(statusCode))
-                                                    {
-                                                        break;
-                                                    }
+                                                    break;
                                                 }
                                             }
                                         }
@@ -776,20 +810,12 @@ static void vosk_transcribe(PA_PluginParameters params, PA_ObjectRef returnValue
                             
                             set_callback_status(&cbparams[2], speech);
                             PA_ExecuteCommandByID(1007 /*EXECUTE METHOD*/, cbparams, 4);
-                            
-                            PA_ClearVariable(&cbparams[0]);//string (method)
-                    //        PA_ClearVariable(&cbparams[1]);//bool (statusCode) don't clear this
-                            PA_ClearVariable(&cbparams[2]);//object $1
-                            PA_ClearVariable(&cbparams[3]);//object $2
                         }
                         
                         if (method_id) {
                             
                             set_callback_status(&cbparams[0], speech);
-                            PA_ExecuteMethodByID(method_id, cbparams, 2);
-                                                 
-                            PA_ClearVariable(&cbparams[0]);//object $1
-                            PA_ClearVariable(&cbparams[1]);//object $2
+                            execute_callback_method_by_id(method_id, cbparams);
                         }
                         
                         ob_set_s(returnValue, L"text", speech.c_str());
@@ -798,6 +824,16 @@ static void vosk_transcribe(PA_PluginParameters params, PA_ObjectRef returnValue
                 }
             }
         
+        }
+        
+        //also when nothing was transcribed; userData (cbparams[1] or [3]) is borrowed from options
+        if (method_id) {
+            clear_callback_status(&cbparams[0]);//object $1
+        }
+        
+        if (execute_callback_method) {
+            PA_ClearVariable(&cbparams[0]);//string (method)
+            clear_callback_status(&cbparams[2]);//object $1
         }
     }
 }
