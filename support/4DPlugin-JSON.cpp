@@ -305,12 +305,13 @@ bool ob_get_a(PA_ObjectRef obj, const wchar_t *_key, CUTF8String *value) {
         CUTF16String ukey;
         json_wconv(_key, &ukey);
         PA_Unistring key = PA_CreateUnistring((PA_Unichar *)ukey.c_str());
-        is_defined = PA_HasObjectProperty(obj, &key);
-
-        if(is_defined)
+        if(PA_HasObjectProperty(obj, &key))
         {
+            // the result is owned: clear it, unless the call failed
             PA_Variable v = PA_GetObjectProperty(obj, &key);
-            if(PA_GetVariableKind(v) == eVK_Unistring)
+            PA_ErrorCode err = PA_GetLastError();
+            is_defined = (err == eER_NoErr);
+            if(err == eER_NoErr && PA_GetVariableKind(v) == eVK_Unistring)
             {
                 PA_Unistring uvalue = PA_GetStringVariable(v);
 
@@ -348,6 +349,7 @@ bool ob_get_a(PA_ObjectRef obj, const wchar_t *_key, CUTF8String *value) {
                 }
 #endif
             }
+            if(err == eER_NoErr) PA_ClearVariable(&v);
         }
 
         PA_DisposeUnistring(&key);
@@ -368,11 +370,14 @@ bool ob_get_b(PA_ObjectRef obj, const wchar_t *_key) {
 
         if(PA_HasObjectProperty(obj, &key))
         {
+            // the result is owned: clear it, unless the call failed
             PA_Variable v = PA_GetObjectProperty(obj, &key);
-            if(PA_GetVariableKind(v) == eVK_Boolean)
+            PA_ErrorCode err = PA_GetLastError();
+            if(err == eER_NoErr && PA_GetVariableKind(v) == eVK_Boolean)
             {
                 value = PA_GetBooleanVariable(v);
             }
+            if(err == eER_NoErr) PA_ClearVariable(&v);
         }
 
         PA_DisposeUnistring(&key);
@@ -393,11 +398,14 @@ double ob_get_n(PA_ObjectRef obj, const wchar_t *_key) {
 
         if(PA_HasObjectProperty(obj, &key))
         {
+            // the result is owned: clear it, unless the call failed
             PA_Variable v = PA_GetObjectProperty(obj, &key);
-            if(PA_GetVariableKind(v) == eVK_Real)
+            PA_ErrorCode err = PA_GetLastError();
+            if(err == eER_NoErr && PA_GetVariableKind(v) == eVK_Real)
             {
                 value = PA_GetRealVariable(v);
             }
+            if(err == eER_NoErr) PA_ClearVariable(&v);
         }
 
         PA_DisposeUnistring(&key);
@@ -418,11 +426,15 @@ PA_CollectionRef ob_get_c(PA_ObjectRef obj, const wchar_t *_key) {
 
         if(PA_HasObjectProperty(obj, &key))
         {
+            // the result is owned: clear it, unless the call failed
             PA_Variable v = PA_GetObjectProperty(obj, &key);
-            if(PA_GetVariableKind(v) == eVK_Collection)
+            PA_ErrorCode err = PA_GetLastError();
+            if(err == eER_NoErr && PA_GetVariableKind(v) == eVK_Collection)
             {
+                // borrowed from obj once the property's own reference is released
                 value = PA_GetCollectionVariable(v);
             }
+            if(err == eER_NoErr) PA_ClearVariable(&v);
         }
 
         PA_DisposeUnistring(&key);
@@ -442,11 +454,15 @@ PA_ObjectRef ob_get_o(PA_ObjectRef obj, const wchar_t *_key) {
 
         if(PA_HasObjectProperty(obj, &key))
         {
+            // the result is owned: clear it, unless the call failed
             PA_Variable v = PA_GetObjectProperty(obj, &key);
-            if(PA_GetVariableKind(v) == eVK_Object)
+            PA_ErrorCode err = PA_GetLastError();
+            if(err == eER_NoErr && PA_GetVariableKind(v) == eVK_Object)
             {
+                // borrowed from obj once the property's own reference is released
                 value = PA_GetObjectVariable(v);
             }
+            if(err == eER_NoErr) PA_ClearVariable(&v);
         }
 
         PA_DisposeUnistring(&key);
@@ -467,7 +483,11 @@ void ob_stringify(PA_ObjectRef obj, CUTF8String *value) {
     _params[0] = PA_CreateVariable(eVK_Undefined);
     PA_SetObjectVariable(&_params[0], obj);
     PA_Variable vjson = PA_ExecuteCommandByID( /*JSON Stringify */1217, _params, 1);
+    PA_ErrorCode err = PA_GetLastError();
     PA_SetObjectVariable(&_params[0], NULL);
+
+    // a failed call leaves its result uninitialised: neither read nor clear it
+    if(err != eER_NoErr) return;
 
     if(PA_GetVariableKind(vjson) != eVK_Unistring)
     {
